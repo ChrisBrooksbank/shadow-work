@@ -10,7 +10,7 @@
 
 ### Phase 1 — Foundation
 
-- [ ] Create index.html, vite.config.ts, src/main.tsx, src/App.tsx — bare minimum to run `npm run dev` (spec: phase-1-foundation.md)
+- [x] Create index.html, vite.config.ts, src/main.tsx, src/App.tsx — bare minimum to run `npm run dev` (spec: phase-1-foundation.md)
 - [ ] Add CSS design tokens: tokens.css (colors), typography.css (Space Grotesk + Space Mono font-face), index.css (global dark theme resets) (spec: phase-1-foundation.md)
 - [ ] Self-host fonts: download Space Grotesk + Space Mono woff2 files to public/fonts/ (spec: phase-1-foundation.md)
 - [ ] Add glitch.css with keyframe animations for persona-cracking glitch effects (spec: phase-1-foundation.md)
