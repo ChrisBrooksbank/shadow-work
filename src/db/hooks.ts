@@ -92,3 +92,8 @@ export function useTodaysCheckIn(): DailyCheckIn | null | undefined {
 export function useRecentActivity(limit = 10): RecentActivityItem[] | undefined {
   return useLiveQuery(() => queryRecentActivity(limit), [limit]);
 }
+
+/** Reactive hook — returns all journal entries sorted newest-first. */
+export function useJournalEntries(): import('./schema').JournalEntry[] | undefined {
+  return useLiveQuery(() => db.journalEntries.orderBy('createdAt').reverse().toArray(), []);
+}

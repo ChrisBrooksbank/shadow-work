@@ -34,7 +34,7 @@
 ### Phase 3 — Journal
 
 - [x] Create src/data/prompts.ts with 4 pool categories (projection, childhood, self-examination, integration) populated from research.md (spec: phase-3-journal.md)
-- [ ] Build Journal list page with date-grouped entries (spec: phase-3-journal.md)
+- [x] Build Journal list page with date-grouped entries (spec: phase-3-journal.md)
 - [ ] Build JournalEntry write/view/edit page: auto-save debounced to IndexedDB, optional prompt at top, tag support, timestamps (spec: phase-3-journal.md)
 - [ ] Add journal entries to streak calculation; add "New entry" access from Home quick actions (spec: phase-3-journal.md)
 
