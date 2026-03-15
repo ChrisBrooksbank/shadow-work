@@ -1,0 +1,197 @@
+/* Ember flicker — breathes between deep red and orange-amber */
+@keyframes ember-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scaleY(1) scaleX(1);
+  }
+  15% {
+    opacity: 0.85;
+    transform: scaleY(1.04) scaleX(0.97);
+  }
+  30% {
+    opacity: 1;
+    transform: scaleY(0.97) scaleX(1.02);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scaleY(1.06) scaleX(0.96);
+  }
+  70% {
+    opacity: 0.95;
+    transform: scaleY(0.98) scaleX(1.01);
+  }
+  85% {
+    opacity: 1;
+    transform: scaleY(1.03) scaleX(0.98);
+  }
+}
+
+/* Glow pulse around the flame */
+@keyframes ember-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px 2px rgba(192, 57, 43, 0.5),
+      0 0 20px 4px rgba(139, 26, 26, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 14px 5px rgba(220, 80, 30, 0.7),
+      0 0 32px 10px rgba(192, 57, 43, 0.4);
+  }
+}
+
+/* Color cycle for the count number */
+@keyframes ember-count-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 6px rgba(192, 57, 43, 0.6);
+    color: #e8e0d4;
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(220, 100, 40, 0.9),
+      0 0 20px rgba(192, 57, 43, 0.5);
+    color: #f0d5c0;
+  }
+}
+
+/* Inner flame waver */
+@keyframes flame-waver {
+  0%,
+  100% {
+    clip-path: polygon(50% 0%, 80% 40%, 100% 80%, 70% 100%, 30% 100%, 0% 80%, 20% 40%);
+    opacity: 0.7;
+  }
+  33% {
+    clip-path: polygon(45% 0%, 85% 35%, 95% 75%, 65% 100%, 35% 100%, 5% 75%, 15% 35%);
+    opacity: 0.85;
+  }
+  66% {
+    clip-path: polygon(55% 0%, 75% 45%, 100% 85%, 72% 100%, 28% 100%, 0% 85%, 25% 45%);
+    opacity: 0.75;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.emberWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  transition: border-color 0.4s ease;
+}
+
+.emberWrap.active {
+  border-color: rgba(192, 57, 43, 0.4);
+  animation: ember-glow 2.5s ease-in-out infinite;
+}
+
+.flameBase {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flameInner {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    rgba(192, 57, 43, 0.35) 0%,
+    rgba(139, 26, 26, 0.2) 50%,
+    transparent 80%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.active .flameInner {
+  opacity: 1;
+  animation: flame-waver 1.8s ease-in-out infinite;
+}
+
+.flameCore {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 28px;
+  background: radial-gradient(
+    ellipse at 50% 70%,
+    rgba(220, 100, 40, 0.5) 0%,
+    rgba(192, 57, 43, 0.3) 50%,
+    transparent 80%
+  );
+  opacity: 0;
+  border-radius: 50% 50% 30% 30%;
+  transition: opacity 0.4s ease;
+}
+
+.active .flameCore {
+  opacity: 1;
+  animation: ember-flicker 1.4s ease-in-out infinite;
+}
+
+.count {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-mono, monospace);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: color 0.4s ease;
+  line-height: 1;
+}
+
+.count.countActive {
+  color: var(--text-primary);
+  animation: ember-count-glow 2.5s ease-in-out infinite;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.returnMessage {
+  margin: var(--space-2) 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+  max-width: 200px;
+  line-height: 1.5;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .emberWrap.active,
+  .active .flameInner,
+  .active .flameCore,
+  .count.countActive {
+    animation: none;
+  }
+}
