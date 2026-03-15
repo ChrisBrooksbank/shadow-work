@@ -20,7 +20,7 @@
 - [x] Build UI primitives: Button, Card, TextArea, Modal, ProgressBar in src/components/ui/ (spec: phase-1-foundation.md)
 - [x] Build SafeArea wrapper + PageTransition component using framer-motion AnimatePresence (spec: phase-1-foundation.md)
 - [x] Add vite-plugin-pwa to vite.config.ts with PWA manifest (portrait lock, dark theme, name/icons stubs) (spec: phase-1-foundation.md)
-- [ ] Add stub page components for all routes so navigation works end-to-end (spec: phase-1-foundation.md)
+- [x] Add stub page components for all routes so navigation works end-to-end (spec: phase-1-foundation.md)
 
 ### Phase 2 — Daily Practice
 
