@@ -1,0 +1,15 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.withNav {
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+}

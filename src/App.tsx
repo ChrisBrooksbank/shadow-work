@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Layout from './components/layout/Layout';
 import DailyCheckIn from './pages/DailyCheckIn';
 import ExerciseSession from './pages/ExerciseSession';
 import Exercises from './pages/Exercises';
@@ -14,20 +15,22 @@ import Settings from './pages/Settings';
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/check-in" element={<DailyCheckIn />} />
-        <Route path="/exercises" element={<Exercises />} />
-        <Route path="/exercises/:id" element={<ExerciseSession />} />
-        <Route path="/journal" element={<Journal />} />
-        <Route path="/journal/new" element={<JournalEntry />} />
-        <Route path="/journal/:id" element={<JournalEntry />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/learn" element={<Learn />} />
-        <Route path="/learn/:slug" element={<LearnTopic />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/check-in" element={<DailyCheckIn />} />
+          <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercises/:id" element={<ExerciseSession />} />
+          <Route path="/journal" element={<Journal />} />
+          <Route path="/journal/new" element={<JournalEntry />} />
+          <Route path="/journal/:id" element={<JournalEntry />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/learn/:slug" element={<LearnTopic />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }
