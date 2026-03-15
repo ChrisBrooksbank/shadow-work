@@ -1,0 +1,198 @@
+.page {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-5);
+  gap: var(--space-5);
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.backBtn:hover {
+  color: var(--text-primary);
+}
+
+.saveStatus {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ─── Prompt ──────────────────────────────────────────────── */
+
+.addPromptBtn {
+  background: none;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.addPromptBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.promptBox {
+  padding: var(--space-4);
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.promptText {
+  font-size: 15px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.promptActions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.promptAction {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.promptAction:hover {
+  color: var(--text-primary);
+}
+
+/* ─── Tags ────────────────────────────────────────────────── */
+
+.tagsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 4px);
+  padding: 2px var(--space-2);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tagRemove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.tagRemove:hover {
+  color: var(--text-primary);
+}
+
+.tagInputRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tagInput {
+  flex: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: var(--space-2) var(--space-3);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.tagInput:focus {
+  border-color: var(--accent-primary);
+}
+
+.tagInput::placeholder {
+  color: var(--text-muted);
+}
+
+.tagAddBtn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.tagAddBtn:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.tagAddBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ─── Timestamps ──────────────────────────────────────────── */
+
+.timestamps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
