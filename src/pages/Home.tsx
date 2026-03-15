@@ -76,6 +76,9 @@ export default function Home() {
             Begin today&apos;s check-in
           </Button>
         )}
+        <Button fullWidth variant="secondary" onClick={() => navigate('/journal/new')}>
+          New entry
+        </Button>
         <div className={styles.actionRow}>
           <Button variant="secondary" onClick={() => navigate('/journal')}>
             Journal

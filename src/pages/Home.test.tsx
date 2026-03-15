@@ -135,6 +135,12 @@ describe('Home page', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/exercises');
   });
 
+  it('navigates to /journal/new when "New entry" button is clicked', () => {
+    renderPage();
+    fireEvent.click(screen.getByRole('button', { name: /new entry/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/journal/new');
+  });
+
   it('does not render the activity feed when there is no recent activity', () => {
     vi.mocked(hooks.useRecentActivity).mockReturnValue([]);
     renderPage();
