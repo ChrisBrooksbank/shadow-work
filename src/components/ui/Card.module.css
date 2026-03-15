@@ -1,0 +1,29 @@
+.card {
+  background-color: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.padded {
+  padding: var(--space-4);
+}
+
+.clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.clickable:hover {
+  background-color: var(--bg-elevated);
+  border-color: rgba(232, 224, 212, 0.14);
+}
+
+.clickable:active {
+  opacity: 0.8;
+}

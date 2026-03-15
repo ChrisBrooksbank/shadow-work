@@ -1,0 +1,68 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+  padding: 0;
+}
+
+@media (min-height: 600px) {
+  .backdrop {
+    align-items: center;
+    padding: var(--space-4);
+  }
+}
+
+.panel {
+  background-color: var(--bg-raised);
+  border-top: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-4);
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+  position: relative;
+}
+
+@media (min-height: 600px) {
+  .panel {
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-subtle);
+    padding-bottom: var(--space-6);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s ease;
+}
+
+.closeButton:hover {
+  color: var(--text-primary);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-4);
+  padding-right: var(--space-8);
+}
