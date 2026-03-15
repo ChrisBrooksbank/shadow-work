@@ -26,7 +26,7 @@
 
 - [x] Create src/data/daily-questions.ts with 20+ provocative shadow questions (spec: phase-2-daily-practice.md)
 - [x] Implement streak.ts logic: a day counts if check-in OR journal entry OR exercise completed (spec: phase-2-daily-practice.md)
-- [ ] Add DB hooks to src/db/hooks.ts: useStreak(), useTodaysCheckIn(), useRecentActivity() (spec: phase-2-daily-practice.md)
+- [x] Add DB hooks to src/db/hooks.ts: useStreak(), useTodaysCheckIn(), useRecentActivity() (spec: phase-2-daily-practice.md)
 - [ ] Build DailyCheckIn page — 4-step guided flow (presence scale → emotion grid → trigger yes/no → freewrite → completion screen with shadow quote) (spec: phase-2-daily-practice.md)
 - [ ] Build StreakDisplay component with ember/fire animation (spec: phase-2-daily-practice.md)
 - [ ] Build Home page dashboard: daily question with glitch effect, streak display, check-in status, quick action buttons, recent activity feed (spec: phase-2-daily-practice.md)
