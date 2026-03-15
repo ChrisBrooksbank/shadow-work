@@ -46,7 +46,7 @@
 - [x] Build step renderer components: instruction, prompt, freewrite, timed-pause, choice, reflection (spec: phase-4-exercise-engine.md)
 - [x] Build ExerciseShell component — full-screen modal, immersive layout, depth badges, safety disclaimer for abyss exercises (spec: phase-4-exercise-engine.md)
 - [x] Build Exercise library page — grid of all exercises with depth/stage/duration metadata (spec: phase-4-exercise-engine.md)
-- [ ] On exercise completion: bundle responses, offer "Save reflections?" → auto-create journal entry; store in exerciseCompletions; count toward streak (spec: phase-4-exercise-engine.md)
+- [x] On exercise completion: bundle responses, offer "Save reflections?" → auto-create journal entry; store in exerciseCompletions; count toward streak (spec: phase-4-exercise-engine.md)
 
 ### Phase 5 — Specialized Exercises
 

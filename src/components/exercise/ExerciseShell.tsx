@@ -64,11 +64,17 @@ interface ExerciseShellProps {
   exercise: Exercise;
   onClose: () => void;
   onComplete?: (responses: Record<string, string>) => void;
+  onSaveReflections?: (responses: Record<string, string>) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function ExerciseShell({ exercise, onClose, onComplete }: ExerciseShellProps) {
+export default function ExerciseShell({
+  exercise,
+  onClose,
+  onComplete,
+  onSaveReflections,
+}: ExerciseShellProps) {
   const flow = useExerciseFlow(exercise);
 
   function handleAdvance() {
@@ -79,6 +85,12 @@ export default function ExerciseShell({ exercise, onClose, onComplete }: Exercis
     } else {
       flow.advance();
     }
+  }
+
+  function handleSaveReflections() {
+    hapticLight();
+    onSaveReflections?.(flow.responses);
+    onClose();
   }
 
   function handleBack() {
@@ -177,7 +189,17 @@ export default function ExerciseShell({ exercise, onClose, onComplete }: Exercis
             You have done meaningful work. Give yourself a moment before returning.
           </p>
           <div className={styles.completeActions}>
-            <Button onClick={handleAdvance} fullWidth size="lg">
+            {onSaveReflections && (
+              <Button onClick={handleSaveReflections} fullWidth size="lg">
+                Save reflections to journal
+              </Button>
+            )}
+            <Button
+              onClick={handleAdvance}
+              fullWidth
+              size="lg"
+              variant={onSaveReflections ? 'secondary' : 'primary'}
+            >
               Done
             </Button>
           </div>

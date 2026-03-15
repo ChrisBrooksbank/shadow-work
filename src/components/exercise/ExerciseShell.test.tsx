@@ -243,4 +243,61 @@ describe('Complete phase', () => {
     fireEvent.click(screen.getByRole('button', { name: /done/i }));
     expect(onClose).toHaveBeenCalledOnce();
   });
+
+  it('does NOT show "Save reflections" button when onSaveReflections is not provided', () => {
+    advanceToComplete();
+    expect(screen.queryByRole('button', { name: /save reflections/i })).not.toBeInTheDocument();
+  });
+
+  describe('with onSaveReflections', () => {
+    function advanceToCompleteWithSave() {
+      const onComplete = vi.fn();
+      const onClose = vi.fn();
+      const onSaveReflections = vi.fn();
+      render(
+        <ExerciseShell
+          exercise={surfaceExercise}
+          onClose={onClose}
+          onComplete={onComplete}
+          onSaveReflections={onSaveReflections}
+        />,
+      );
+      fireEvent.click(screen.getByRole('button', { name: /begin/i }));
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      fireEvent.click(screen.getByRole('button', { name: /continue/i }));
+      fireEvent.click(screen.getByRole('button', { name: /complete/i }));
+      return { onComplete, onClose, onSaveReflections };
+    }
+
+    it('shows "Save reflections to journal" button', () => {
+      advanceToCompleteWithSave();
+      expect(
+        screen.getByRole('button', { name: /save reflections to journal/i }),
+      ).toBeInTheDocument();
+    });
+
+    it('calls onSaveReflections with responses when Save button is clicked', () => {
+      const { onSaveReflections } = advanceToCompleteWithSave();
+      fireEvent.click(screen.getByRole('button', { name: /save reflections to journal/i }));
+      expect(onSaveReflections).toHaveBeenCalledOnce();
+      expect(onSaveReflections).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    it('calls onClose when Save button is clicked', () => {
+      const { onClose } = advanceToCompleteWithSave();
+      fireEvent.click(screen.getByRole('button', { name: /save reflections to journal/i }));
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it('does NOT call onComplete when Save button is clicked', () => {
+      const { onComplete } = advanceToCompleteWithSave();
+      fireEvent.click(screen.getByRole('button', { name: /save reflections to journal/i }));
+      expect(onComplete).not.toHaveBeenCalled();
+    });
+
+    it('still has a Done button', () => {
+      advanceToCompleteWithSave();
+      expect(screen.getByRole('button', { name: /done/i })).toBeInTheDocument();
+    });
+  });
 });
