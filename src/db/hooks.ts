@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './index';
-import type { DailyCheckIn, StreakRecord } from './schema';
+import type { DailyCheckIn, StreakRecord, TriggerLog } from './schema';
 
 const DEFAULT_STREAK: StreakRecord = {
   key: 'current',
@@ -96,4 +96,70 @@ export function useRecentActivity(limit = 10): RecentActivityItem[] | undefined 
 /** Reactive hook — returns all journal entries sorted newest-first. */
 export function useJournalEntries(): import('./schema').JournalEntry[] | undefined {
   return useLiveQuery(() => db.journalEntries.orderBy('createdAt').reverse().toArray(), []);
+}
+
+// ─── Trigger Patterns ─────────────────────────────────────────────────────────
+
+const BODY_KEYWORDS = [
+  'chest',
+  'throat',
+  'stomach',
+  'belly',
+  'gut',
+  'head',
+  'shoulders',
+  'jaw',
+  'neck',
+  'hands',
+  'heart',
+  'back',
+  'arms',
+  'legs',
+  'face',
+];
+
+export interface TriggerPattern {
+  totalLogs: number;
+  emotionCounts: Record<string, number>;
+  averageIntensity: number;
+  bodyKeywordCounts: Record<string, number>;
+  recentLogs: TriggerLog[];
+}
+
+export async function queryTriggerPatterns(): Promise<TriggerPattern> {
+  const logs = await db.triggerLogs.orderBy('createdAt').reverse().toArray();
+
+  const emotionCounts: Record<string, number> = {};
+  let totalIntensity = 0;
+  const bodyKeywordCounts: Record<string, number> = {};
+
+  for (const log of logs) {
+    emotionCounts[log.emotion] = (emotionCounts[log.emotion] ?? 0) + 1;
+    totalIntensity += log.intensity;
+
+    const location = (log.bodyLocation ?? '').toLowerCase();
+    for (const keyword of BODY_KEYWORDS) {
+      if (location.includes(keyword)) {
+        bodyKeywordCounts[keyword] = (bodyKeywordCounts[keyword] ?? 0) + 1;
+      }
+    }
+  }
+
+  return {
+    totalLogs: logs.length,
+    emotionCounts,
+    averageIntensity: logs.length > 0 ? totalIntensity / logs.length : 0,
+    bodyKeywordCounts,
+    recentLogs: logs.slice(0, 5),
+  };
+}
+
+/** Reactive hook — returns all trigger logs sorted newest-first. */
+export function useTriggerLogs(): TriggerLog[] | undefined {
+  return useLiveQuery(() => db.triggerLogs.orderBy('createdAt').reverse().toArray(), []);
+}
+
+/** Reactive hook — returns computed trigger pattern analysis. */
+export function useTriggerPatterns(): TriggerPattern | undefined {
+  return useLiveQuery(() => queryTriggerPatterns(), []);
 }

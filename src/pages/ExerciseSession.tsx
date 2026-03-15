@@ -3,6 +3,7 @@ import { exercises } from '../data/exercises';
 import ExerciseShell from '../components/exercise/ExerciseShell';
 import { db } from '../db/index';
 import { recalculateStreak } from '../db/streak';
+import type { TriggerLog } from '../db/schema';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,40 @@ async function saveCompletionWithJournal(
   await recalculateStreak();
 }
 
+// ─── Trigger Log helpers ──────────────────────────────────────────────────────
+
+/**
+ * Parse trigger-tracking exercise responses into structured TriggerLog fields.
+ * Extracts a 1-10 integer from the intensity/body-location freeform response.
+ */
+function parseTriggerLog(responses: Record<string, string>): Omit<TriggerLog, 'id' | 'createdAt'> {
+  const situation = responses['tt-situation'] ?? '';
+  const emotion = responses['tt-emotion'] ?? '';
+  const intensityText = responses['tt-intensity'] ?? '';
+  const shadowInsight = responses['tt-shadow'] ?? '';
+
+  // Extract the first 1–10 integer from the freeform response (e.g. "8/10. Tight chest…")
+  const match = intensityText.match(/\b(10|[1-9])\b/);
+  const intensity = match && match[1] !== undefined ? parseInt(match[1], 10) : 5;
+
+  return {
+    situation,
+    emotion,
+    intensity,
+    bodyLocation: intensityText || undefined,
+    shadowInsight: shadowInsight || undefined,
+  };
+}
+
+async function saveTriggerLog(responses: Record<string, string>): Promise<void> {
+  const parsed = parseTriggerLog(responses);
+  await db.triggerLogs.add({
+    id: crypto.randomUUID(),
+    ...parsed,
+    createdAt: new Date(),
+  });
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ExerciseSession() {
@@ -86,15 +121,33 @@ export default function ExerciseSession() {
   const ex = exercise;
 
   function handleComplete(responses: Record<string, string>) {
-    void saveCompletion(ex.id, responses, mountedAt).then(() => {
-      navigate('/exercises');
-    });
+    if (ex.id === 'trigger-tracking') {
+      void Promise.all([
+        saveCompletion(ex.id, responses, mountedAt),
+        saveTriggerLog(responses),
+      ]).then(() => {
+        navigate('/exercises/trigger-patterns');
+      });
+    } else {
+      void saveCompletion(ex.id, responses, mountedAt).then(() => {
+        navigate('/exercises');
+      });
+    }
   }
 
   function handleSaveReflections(responses: Record<string, string>) {
-    void saveCompletionWithJournal(ex, responses, mountedAt).then(() => {
-      navigate('/journal');
-    });
+    if (ex.id === 'trigger-tracking') {
+      void Promise.all([
+        saveCompletionWithJournal(ex, responses, mountedAt),
+        saveTriggerLog(responses),
+      ]).then(() => {
+        navigate('/exercises/trigger-patterns');
+      });
+    } else {
+      void saveCompletionWithJournal(ex, responses, mountedAt).then(() => {
+        navigate('/journal');
+      });
+    }
   }
 
   return (

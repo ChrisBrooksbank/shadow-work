@@ -1,6 +1,12 @@
 import 'fake-indexeddb/auto';
 import { db } from './index';
-import { queryStreak, queryTodaysCheckIn, queryRecentActivity, todayDateString } from './hooks';
+import {
+  queryStreak,
+  queryTodaysCheckIn,
+  queryRecentActivity,
+  queryTriggerPatterns,
+  todayDateString,
+} from './hooks';
 import { toDateString } from './streak';
 
 beforeEach(async () => {
@@ -164,4 +170,82 @@ test('queryRecentActivity labels are correct per type', async () => {
 test('todayDateString returns a valid YYYY-MM-DD string', () => {
   const s = todayDateString();
   expect(s).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+});
+
+// ── queryTriggerPatterns ───────────────────────────────────────────────────────
+
+test('queryTriggerPatterns returns zero defaults when no logs', async () => {
+  await db.triggerLogs.clear();
+  const result = await queryTriggerPatterns();
+  expect(result.totalLogs).toBe(0);
+  expect(result.averageIntensity).toBe(0);
+  expect(result.emotionCounts).toEqual({});
+  expect(result.bodyKeywordCounts).toEqual({});
+  expect(result.recentLogs).toHaveLength(0);
+});
+
+test('queryTriggerPatterns counts emotions correctly', async () => {
+  await db.triggerLogs.clear();
+  const now = new Date();
+  await db.triggerLogs.bulkAdd([
+    { id: 'tl-1', situation: 'a', emotion: 'Anger', intensity: 7, createdAt: now },
+    { id: 'tl-2', situation: 'b', emotion: 'Anger', intensity: 5, createdAt: now },
+    { id: 'tl-3', situation: 'c', emotion: 'Fear', intensity: 8, createdAt: now },
+  ]);
+  const result = await queryTriggerPatterns();
+  expect(result.totalLogs).toBe(3);
+  expect(result.emotionCounts['Anger']).toBe(2);
+  expect(result.emotionCounts['Fear']).toBe(1);
+});
+
+test('queryTriggerPatterns calculates average intensity', async () => {
+  await db.triggerLogs.clear();
+  const now = new Date();
+  await db.triggerLogs.bulkAdd([
+    { id: 'tl-1', situation: 'a', emotion: 'Anger', intensity: 6, createdAt: now },
+    { id: 'tl-2', situation: 'b', emotion: 'Shame', intensity: 8, createdAt: now },
+  ]);
+  const result = await queryTriggerPatterns();
+  expect(result.averageIntensity).toBe(7);
+});
+
+test('queryTriggerPatterns counts body location keywords', async () => {
+  await db.triggerLogs.clear();
+  const now = new Date();
+  await db.triggerLogs.bulkAdd([
+    {
+      id: 'tl-1',
+      situation: 'a',
+      emotion: 'Anger',
+      intensity: 7,
+      bodyLocation: 'tight chest and shoulders',
+      createdAt: now,
+    },
+    {
+      id: 'tl-2',
+      situation: 'b',
+      emotion: 'Fear',
+      intensity: 6,
+      bodyLocation: 'chest tightness',
+      createdAt: now,
+    },
+  ]);
+  const result = await queryTriggerPatterns();
+  expect(result.bodyKeywordCounts['chest']).toBe(2);
+  expect(result.bodyKeywordCounts['shoulders']).toBe(1);
+});
+
+test('queryTriggerPatterns returns at most 5 recent logs', async () => {
+  await db.triggerLogs.clear();
+  const logs = Array.from({ length: 7 }, (_, i) => ({
+    id: `tl-${i}`,
+    situation: `situation ${i}`,
+    emotion: 'Anger',
+    intensity: 5,
+    createdAt: new Date(Date.now() - i * 1000),
+  }));
+  await db.triggerLogs.bulkAdd(logs);
+  const result = await queryTriggerPatterns();
+  expect(result.totalLogs).toBe(7);
+  expect(result.recentLogs).toHaveLength(5);
 });

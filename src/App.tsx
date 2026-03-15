@@ -11,6 +11,7 @@ import LearnTopic from './pages/LearnTopic';
 import Onboarding from './pages/Onboarding';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
+import TriggerPatterns from './pages/TriggerPatterns';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/check-in" element={<DailyCheckIn />} />
           <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercises/trigger-patterns" element={<TriggerPatterns />} />
           <Route path="/exercises/:id" element={<ExerciseSession />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/journal/new" element={<JournalEntry />} />
