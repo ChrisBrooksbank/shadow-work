@@ -29,7 +29,7 @@
 - [x] Add DB hooks to src/db/hooks.ts: useStreak(), useTodaysCheckIn(), useRecentActivity() (spec: phase-2-daily-practice.md)
 - [x] Build DailyCheckIn page — 4-step guided flow (presence scale → emotion grid → trigger yes/no → freewrite → completion screen with shadow quote) (spec: phase-2-daily-practice.md)
 - [x] Build StreakDisplay component with ember/fire animation (spec: phase-2-daily-practice.md)
-- [ ] Build Home page dashboard: daily question with glitch effect, streak display, check-in status, quick action buttons, recent activity feed (spec: phase-2-daily-practice.md)
+- [x] Build Home page dashboard: daily question with glitch effect, streak display, check-in status, quick action buttons, recent activity feed (spec: phase-2-daily-practice.md)
 
 ### Phase 3 — Journal
 
