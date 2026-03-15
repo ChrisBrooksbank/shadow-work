@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import BottomNav from './BottomNav';
+import PageTransition from './PageTransition';
 import styles from './Layout.module.css';
 
 /** Routes that should not render the bottom nav */
@@ -16,7 +17,9 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className={styles.shell}>
-      <main className={`${styles.content} ${showNav ? styles.withNav : ''}`}>{children}</main>
+      <main className={`${styles.content} ${showNav ? styles.withNav : ''}`}>
+        <PageTransition>{children}</PageTransition>
+      </main>
       {showNav && <BottomNav />}
     </div>
   );

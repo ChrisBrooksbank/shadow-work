@@ -18,7 +18,7 @@
 - [x] Set up React Router in App.tsx with all routes from plan.md routing table (spec: phase-1-foundation.md)
 - [x] Build Layout shell + BottomNav component (56px, safe-area inset, hide on textarea focus, haptic on tap) (spec: phase-1-foundation.md)
 - [x] Build UI primitives: Button, Card, TextArea, Modal, ProgressBar in src/components/ui/ (spec: phase-1-foundation.md)
-- [ ] Build SafeArea wrapper + PageTransition component using framer-motion AnimatePresence (spec: phase-1-foundation.md)
+- [x] Build SafeArea wrapper + PageTransition component using framer-motion AnimatePresence (spec: phase-1-foundation.md)
 - [ ] Add vite-plugin-pwa to vite.config.ts with PWA manifest (portrait lock, dark theme, name/icons stubs) (spec: phase-1-foundation.md)
 - [ ] Add stub page components for all routes so navigation works end-to-end (spec: phase-1-foundation.md)
 
