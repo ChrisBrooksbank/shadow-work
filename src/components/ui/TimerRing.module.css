@@ -1,0 +1,16 @@
+.ring {
+  display: block;
+  /* Subtle glow on the arc colour */
+  filter: drop-shadow(0 0 6px var(--accent-primary));
+}
+
+.arc {
+  transition: stroke-dashoffset 0.5s linear;
+}
+
+.label {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.125rem;
+  fill: var(--text-primary);
+  letter-spacing: 0.05em;
+}

@@ -42,7 +42,7 @@
 
 - [x] Create src/data/exercises.ts with data structures and all 7 exercise definitions (Shadow Journaling, 3-2-1 Process, Inner Child Work, Active Imagination, Mirror Work, Trigger Tracking, Dream Work) (spec: phase-4-exercise-engine.md)
 - [x] Build useExerciseFlow hook — state machine: intro → safety-check (abyss only) → step[0..n] → reflection → complete (spec: phase-4-exercise-engine.md)
-- [ ] Build TimerRing SVG component — circular progress ring that fills over duration (spec: phase-4-exercise-engine.md)
+- [x] Build TimerRing SVG component — circular progress ring that fills over duration (spec: phase-4-exercise-engine.md)
 - [ ] Build step renderer components: instruction, prompt, freewrite, timed-pause, choice, reflection (spec: phase-4-exercise-engine.md)
 - [ ] Build ExerciseShell component — full-screen modal, immersive layout, depth badges, safety disclaimer for abyss exercises (spec: phase-4-exercise-engine.md)
 - [ ] Build Exercise library page — grid of all exercises with depth/stage/duration metadata (spec: phase-4-exercise-engine.md)
