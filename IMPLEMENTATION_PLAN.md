@@ -50,7 +50,7 @@
 
 ### Phase 5 — Specialized Exercises
 
-- [ ] Create src/data/safety.ts with safety disclaimers and grounding techniques (5-4-3-2-1 sensory, breathing exercise) (spec: phase-5-specialized-exercises.md)
+- [x] Create src/data/safety.ts with safety disclaimers and grounding techniques (5-4-3-2-1 sensory, breathing exercise) (spec: phase-5-specialized-exercises.md)
 - [ ] Trigger Tracking enhancements: structured input form (situation, emotion, intensity, body location, shadow insight), store in triggerLogs, pattern analysis summary (spec: phase-5-specialized-exercises.md)
 - [ ] Dream Work enhancements: DreamEntry storage in dreamEntries, figure tracking, emotion tagging, analysis notes, dream journal list view (spec: phase-5-specialized-exercises.md)
 - [ ] Inner Child Work guided flow: visualization prompts step-by-step, letter writing step with save (spec: phase-5-specialized-exercises.md)
