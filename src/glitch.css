@@ -1,0 +1,273 @@
+/* Glitch animations for persona-cracking effects */
+
+/* Core glitch keyframes — horizontal RGB channel split */
+@keyframes glitch-clip {
+  0%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+    transform: translate(0);
+  }
+  10% {
+    clip-path: inset(10% 0 60% 0);
+    transform: translate(-4px, 1px);
+  }
+  20% {
+    clip-path: inset(50% 0 20% 0);
+    transform: translate(4px, -1px);
+  }
+  30% {
+    clip-path: inset(80% 0 5% 0);
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    clip-path: inset(30% 0 50% 0);
+    transform: translate(3px, 0);
+  }
+  50% {
+    clip-path: inset(5% 0 80% 0);
+    transform: translate(-3px, -2px);
+  }
+  60% {
+    clip-path: inset(60% 0 15% 0);
+    transform: translate(2px, 1px);
+  }
+  70% {
+    clip-path: inset(25% 0 40% 0);
+    transform: translate(-4px, 0);
+  }
+  80% {
+    clip-path: inset(70% 0 10% 0);
+    transform: translate(4px, -1px);
+  }
+  90% {
+    clip-path: inset(15% 0 70% 0);
+    transform: translate(-2px, 2px);
+  }
+}
+
+/* Subtle horizontal drift for secondary layer */
+@keyframes glitch-shift {
+  0%,
+  100% {
+    transform: translate(0);
+    opacity: 0;
+  }
+  5% {
+    transform: translate(6px, 0);
+    opacity: 0.7;
+  }
+  10% {
+    transform: translate(-6px, 0);
+    opacity: 0.5;
+  }
+  15% {
+    transform: translate(3px, -2px);
+    opacity: 0.8;
+  }
+  20% {
+    transform: translate(0);
+    opacity: 0;
+  }
+  55% {
+    transform: translate(0);
+    opacity: 0;
+  }
+  60% {
+    transform: translate(-4px, 1px);
+    opacity: 0.6;
+  }
+  65% {
+    transform: translate(4px, -1px);
+    opacity: 0.4;
+  }
+  70% {
+    transform: translate(0);
+    opacity: 0;
+  }
+}
+
+/* Color channel flicker */
+@keyframes glitch-color {
+  0%,
+  100% {
+    text-shadow: none;
+  }
+  7% {
+    text-shadow:
+      -3px 0 var(--accent-primary),
+      3px 0 var(--accent-purple);
+  }
+  14% {
+    text-shadow: none;
+  }
+  21% {
+    text-shadow:
+      3px 0 var(--accent-primary),
+      -3px 0 var(--accent-purple);
+  }
+  28% {
+    text-shadow: none;
+  }
+  62% {
+    text-shadow: none;
+  }
+  69% {
+    text-shadow:
+      -2px 0 var(--accent-primary),
+      2px 2px var(--accent-purple);
+  }
+  76% {
+    text-shadow: none;
+  }
+}
+
+/* Scan line sweep */
+@keyframes glitch-scan {
+  0% {
+    background-position: 0 -100%;
+  }
+  100% {
+    background-position: 0 200%;
+  }
+}
+
+/* Shake for dramatic moments */
+@keyframes glitch-shake {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  10% {
+    transform: translate(-3px, 2px);
+  }
+  20% {
+    transform: translate(3px, -2px);
+  }
+  30% {
+    transform: translate(-2px, -1px);
+  }
+  40% {
+    transform: translate(2px, 1px);
+  }
+  50% {
+    transform: translate(-1px, 3px);
+  }
+  60% {
+    transform: translate(1px, -3px);
+  }
+  70% {
+    transform: translate(-3px, 1px);
+  }
+  80% {
+    transform: translate(3px, -1px);
+  }
+  90% {
+    transform: translate(-1px, -2px);
+  }
+}
+
+/* Flicker — opacity strobe */
+@keyframes glitch-flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.4;
+  }
+}
+
+/* ─── Utility classes ─────────────────────────────────────── */
+
+/* Wrapper: position:relative required for pseudo-elements */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+/* Continuous ambient glitch on text */
+.glitch-text {
+  animation: glitch-color 6s steps(1) infinite;
+}
+
+/* Glitch with pseudo-element clipping layers */
+.glitch-layers::before,
+.glitch-layers::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glitch-layers::before {
+  color: var(--accent-primary);
+  animation: glitch-clip 4s steps(1) infinite;
+  animation-delay: -1.2s;
+}
+
+.glitch-layers::after {
+  color: var(--accent-purple);
+  animation: glitch-shift 4s steps(1) infinite;
+  animation-delay: -0.4s;
+}
+
+/* Strong glitch — used on exercise entry / dramatic reveals */
+.glitch-strong {
+  animation:
+    glitch-color 3s steps(1) infinite,
+    glitch-shake 3s steps(1) infinite;
+}
+
+/* Subtle ambient flicker — for titles, nav items */
+.glitch-flicker {
+  animation: glitch-flicker 8s linear infinite;
+}
+
+/* Scan line overlay on a container */
+.glitch-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.12) 3px,
+    rgba(0, 0, 0, 0.12) 4px
+  );
+  z-index: 1;
+}
+
+/* One-shot burst — add class temporarily via JS */
+.glitch-burst {
+  animation:
+    glitch-shake 0.4s steps(1),
+    glitch-color 0.4s steps(1);
+}
+
+/* Pause all glitch animations (respect prefers-reduced-motion) */
+@media (prefers-reduced-motion: reduce) {
+  .glitch-text,
+  .glitch-layers::before,
+  .glitch-layers::after,
+  .glitch-strong,
+  .glitch-flicker,
+  .glitch-burst {
+    animation: none;
+  }
+
+  .glitch-layers::before,
+  .glitch-layers::after {
+    display: none;
+  }
+}
