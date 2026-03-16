@@ -1,9 +1,38 @@
-import { useStreak, useProgressStats, useActivityByDate, useTriggerPatterns } from '../db/hooks';
-import type { ExerciseCategory } from '../data/exercises';
+import {
+  useStreak,
+  useProgressStats,
+  useActivityByDate,
+  useTriggerPatterns,
+  useStageProgress,
+} from '../db/hooks';
+import type { ExerciseCategory, ExerciseStage } from '../data/exercises';
 import CalendarHeatmap from '../components/ui/CalendarHeatmap';
 import styles from './Progress.module.css';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const SHADOW_STAGES: { stage: ExerciseStage; label: string; description: string }[] = [
+  {
+    stage: 'recognition',
+    label: 'Recognition',
+    description: 'Seeing the shadow',
+  },
+  {
+    stage: 'encounter',
+    label: 'Encounter',
+    description: 'Meeting what you find',
+  },
+  {
+    stage: 'dialogue',
+    label: 'Dialogue',
+    description: 'Engaging with it directly',
+  },
+  {
+    stage: 'integration',
+    label: 'Integration',
+    description: 'Reclaiming what was hidden',
+  },
+];
 
 const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
   journaling: 'Shadow Journaling',
@@ -32,12 +61,14 @@ export default function Progress() {
   const stats = useProgressStats();
   const activityByDate = useActivityByDate();
   const triggerPatterns = useTriggerPatterns();
+  const stageProgress = useStageProgress();
 
   if (
     streak === undefined ||
     stats === undefined ||
     activityByDate === undefined ||
-    triggerPatterns === undefined
+    triggerPatterns === undefined ||
+    stageProgress === undefined
   ) {
     return (
       <main className={styles.page}>
@@ -155,6 +186,38 @@ export default function Progress() {
                 </span>
               </p>
             )}
+          </section>
+
+          {/* ─── Stage progress ─────────────────────────────────────── */}
+          <section aria-label="Stage progress">
+            <p className={styles.sectionLabel}>Shadow work stages</p>
+            <div className={styles.stageList}>
+              {SHADOW_STAGES.map(({ stage, label, description }, index) => {
+                const engaged = stageProgress.engagedStages.includes(stage);
+                const count = stageProgress.completionsByStage[stage] ?? 0;
+                return (
+                  <div key={stage} className={styles.stageRow}>
+                    {index > 0 && <div className={styles.stageConnector} aria-hidden="true" />}
+                    <div
+                      className={`${styles.stageItem} ${engaged ? styles.stageEngaged : styles.stageUnengaged}`}
+                    >
+                      <div className={styles.stageIndicator} aria-hidden="true">
+                        {engaged ? '◆' : '◇'}
+                      </div>
+                      <div className={styles.stageMeta}>
+                        <span className={styles.stageLabel}>{label}</span>
+                        <span className={styles.stageDescription}>{description}</span>
+                      </div>
+                      {engaged && (
+                        <span className={styles.stageCount} aria-label={`${count} completions`}>
+                          {count}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </section>
 
           {/* ─── Trigger analytics ──────────────────────────────────── */}

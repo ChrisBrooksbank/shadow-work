@@ -69,7 +69,7 @@
 - [x] Build Progress page: current streak + longest streak, total active days, exercise completion counts by type, most practiced type (spec: phase-7-progress.md)
 - [x] Build custom CalendarHeatmap component — activity density per day, ember red color scale, scrollable by month (spec: phase-7-progress.md)
 - [x] Add trigger analytics section: most common emotions, average intensity trend, most common body locations (shown only if trigger logs exist) (spec: phase-7-progress.md)
-- [ ] Add stage progress mapping: show which shadow work stages user has engaged (based on exercise completions by stage) (spec: phase-7-progress.md)
+- [x] Add stage progress mapping: show which shadow work stages user has engaged (based on exercise completions by stage) (spec: phase-7-progress.md)
 
 ### Phase 8 — Onboarding & Polish
 

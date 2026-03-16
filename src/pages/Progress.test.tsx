@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Progress from './Progress';
 import type { StreakRecord } from '../db/schema';
-import type { ProgressStats, TriggerPattern } from '../db/hooks';
+import type { ProgressStats, TriggerPattern, StageProgress } from '../db/hooks';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -12,6 +12,7 @@ vi.mock('../db/hooks', () => ({
   useProgressStats: vi.fn(),
   useActivityByDate: vi.fn(),
   useTriggerPatterns: vi.fn(),
+  useStageProgress: vi.fn(),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -45,6 +46,12 @@ const makeTriggerPattern = (overrides: Partial<TriggerPattern> = {}): TriggerPat
   ...overrides,
 });
 
+const makeStageProgress = (overrides: Partial<StageProgress> = {}): StageProgress => ({
+  engagedStages: [],
+  completionsByStage: {},
+  ...overrides,
+});
+
 function renderPage() {
   return render(
     <MemoryRouter>
@@ -62,6 +69,7 @@ beforeEach(() => {
   vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats());
   vi.mocked(hooks.useActivityByDate).mockReturnValue(emptyActivity);
   vi.mocked(hooks.useTriggerPatterns).mockReturnValue(makeTriggerPattern());
+  vi.mocked(hooks.useStageProgress).mockReturnValue(makeStageProgress());
 });
 
 describe('Progress page', () => {
@@ -75,6 +83,7 @@ describe('Progress page', () => {
     vi.mocked(hooks.useProgressStats).mockReturnValue(undefined);
     vi.mocked(hooks.useActivityByDate).mockReturnValue(undefined);
     vi.mocked(hooks.useTriggerPatterns).mockReturnValue(undefined);
+    vi.mocked(hooks.useStageProgress).mockReturnValue(undefined);
     renderPage();
     expect(screen.getByText('Loading…')).toBeInTheDocument();
   });
@@ -221,5 +230,53 @@ describe('Progress page', () => {
     expect(screen.getByText('Body locations')).toBeInTheDocument();
     expect(screen.getByText('stomach')).toBeInTheDocument();
     expect(screen.getByText('jaw')).toBeInTheDocument();
+  });
+
+  describe('stage progress section', () => {
+    it('shows the stage progress section heading when user has activity', () => {
+      vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+      vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+      renderPage();
+      expect(screen.getByText('Shadow work stages')).toBeInTheDocument();
+    });
+
+    it('renders all four main stages', () => {
+      vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+      vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+      renderPage();
+      expect(screen.getByText('Recognition')).toBeInTheDocument();
+      expect(screen.getByText('Encounter')).toBeInTheDocument();
+      expect(screen.getByText('Dialogue')).toBeInTheDocument();
+      expect(screen.getByText('Integration')).toBeInTheDocument();
+    });
+
+    it('shows completion count for engaged stages', () => {
+      vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 3 }));
+      vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ totalExercises: 3 }));
+      vi.mocked(hooks.useStageProgress).mockReturnValue(
+        makeStageProgress({
+          engagedStages: ['recognition', 'encounter'],
+          completionsByStage: { recognition: 2, encounter: 1 },
+        }),
+      );
+      renderPage();
+      // Completion counts appear as accessible labels
+      expect(screen.getByLabelText('2 completions')).toBeInTheDocument();
+      expect(screen.getByLabelText('1 completions')).toBeInTheDocument();
+    });
+
+    it('does not show completion count for unengaged stages', () => {
+      vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+      vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+      vi.mocked(hooks.useStageProgress).mockReturnValue(
+        makeStageProgress({
+          engagedStages: ['recognition'],
+          completionsByStage: { recognition: 1 },
+        }),
+      );
+      renderPage();
+      // Only recognition is engaged; integration should not have a count label
+      expect(screen.queryByLabelText('0 completions')).not.toBeInTheDocument();
+    });
   });
 });

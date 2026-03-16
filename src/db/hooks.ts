@@ -252,3 +252,35 @@ async function queryActivityByDate(): Promise<ActivityByDate> {
 export function useActivityByDate(): ActivityByDate | undefined {
   return useLiveQuery(() => queryActivityByDate(), []);
 }
+
+// ─── Stage Progress ────────────────────────────────────────────────────────────
+
+import type { ExerciseStage } from '../data/exercises';
+
+export interface StageProgress {
+  /** Stages the user has engaged with (at least one completion). */
+  engagedStages: ExerciseStage[];
+  /** Number of completions per stage. */
+  completionsByStage: Partial<Record<ExerciseStage, number>>;
+}
+
+async function queryStageProgress(): Promise<StageProgress> {
+  const completions = await db.exerciseCompletions.toArray();
+
+  const completionsByStage: Partial<Record<ExerciseStage, number>> = {};
+  for (const completion of completions) {
+    const exercise = exercises.find((e) => e.id === completion.exerciseId);
+    if (exercise) {
+      completionsByStage[exercise.stage] = (completionsByStage[exercise.stage] ?? 0) + 1;
+    }
+  }
+
+  const engagedStages = Object.keys(completionsByStage) as ExerciseStage[];
+
+  return { engagedStages, completionsByStage };
+}
+
+/** Reactive hook — returns which shadow work stages the user has engaged with. */
+export function useStageProgress(): StageProgress | undefined {
+  return useLiveQuery(() => queryStageProgress(), []);
+}
