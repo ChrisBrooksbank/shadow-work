@@ -58,6 +58,8 @@ beforeEach(async () => {
     db.exerciseCompletions.clear(),
     db.journalEntries.clear(),
     db.streaks.clear(),
+    db.triggerLogs.clear(),
+    db.dreamEntries.clear(),
   ]);
 });
 
@@ -225,6 +227,65 @@ describe('ExerciseSession — inner-child', () => {
     await waitFor(async () => {
       const journals = await db.journalEntries.toArray();
       expect(journals[0]!.exerciseId).toBe('inner-child');
+    });
+  });
+});
+
+describe('ExerciseSession — active-imagination', () => {
+  it('Done stores completion and navigates to /exercises', async () => {
+    renderForExercise('active-imagination');
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      expect(completions).toHaveLength(1);
+      expect(completions[0]!.exerciseId).toBe('active-imagination');
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+    });
+  });
+
+  it('Save to journal stores completion AND a journal entry with encounter tag', async () => {
+    renderForExercise('active-imagination');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      const journals = await db.journalEntries.toArray();
+      expect(completions).toHaveLength(1);
+      expect(journals).toHaveLength(1);
+      expect(journals[0]!.tags).toContain('encounter');
+    });
+  });
+
+  it('Save to journal formats the entry under "Active Imagination — The Encounter"', async () => {
+    renderForExercise('active-imagination');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.content).toContain('Active Imagination — The Encounter');
+    });
+  });
+
+  it('Save to journal links the entry to active-imagination exercise', async () => {
+    renderForExercise('active-imagination');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.exerciseId).toBe('active-imagination');
+    });
+  });
+
+  it('Save to journal navigates to /journal', async () => {
+    renderForExercise('active-imagination');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/journal');
     });
   });
 });

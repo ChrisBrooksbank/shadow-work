@@ -33,6 +33,30 @@ export default function TimedPauseStep({ step, onComplete }: Props) {
 
   const progress = Math.min(1, elapsed / step.durationSeconds);
 
+  if (step.ambient) {
+    return (
+      <div className={styles.timedPauseAmbient}>
+        <div className={styles.ambientOrb} aria-hidden="true" />
+        <p className={styles.pauseLabelAmbient}>{step.label}</p>
+        <div className={styles.ambientRingWrap}>
+          <TimerRing
+            progress={progress}
+            elapsed={elapsed}
+            duration={step.durationSeconds}
+            size={140}
+            label={step.label}
+          />
+        </div>
+        <p className={styles.breatheHint}>breathe</p>
+        {done && (
+          <Button onClick={onComplete} fullWidth>
+            Continue
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.timedPause}>
       <p className={styles.pauseLabel}>{step.label}</p>

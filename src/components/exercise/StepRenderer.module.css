@@ -70,6 +70,97 @@
   margin: 0;
 }
 
+/* ─── Ambient (meditation) timed pause ──────────────────────────────────────── */
+
+@keyframes ambient-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.12;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.05;
+  }
+}
+
+@keyframes ambient-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.timedPauseAmbient {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-10) var(--space-6);
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 55vh;
+  box-sizing: border-box;
+}
+
+.ambientOrb {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, var(--accent-deep) 0%, transparent 68%);
+  animation: ambient-breathe 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.ambientRingWrap {
+  animation: ambient-ring-pulse 6s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.pauseLabelAmbient {
+  font-size: 15px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+  letter-spacing: 0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.breatheHint {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  animation: ambient-ring-pulse 6s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambientOrb,
+  .ambientRingWrap,
+  .breatheHint {
+    animation: none;
+  }
+  .ambientOrb {
+    opacity: 0.08;
+  }
+}
+
 /* ─── Choice step ───────────────────────────────────────────────────────────── */
 
 .options {

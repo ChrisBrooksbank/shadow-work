@@ -154,6 +154,62 @@ async function saveInnerChildLetter(
   await recalculateStreak();
 }
 
+// ─── Active Imagination helpers ───────────────────────────────────────────────
+
+/**
+ * Format active-imagination responses into a journal entry that foregrounds
+ * the encounter dialogue (the freewrite recorded after meditation).
+ */
+function formatActiveImaginationJournal(responses: Record<string, string>): string {
+  const whatArose = responses['ai-what-arose'] ?? '';
+  const dialogue = responses['ai-dialogue'] ?? '';
+  const meaning = responses['ai-meaning'] ?? '';
+  const reflection = responses['ai-reflection'] ?? '';
+
+  const lines: string[] = ['# Active Imagination — The Encounter', ''];
+  if (whatArose.trim()) {
+    lines.push('**What arose**', whatArose.trim(), '');
+  }
+  if (dialogue.trim()) {
+    lines.push('**The encounter**', dialogue.trim(), '');
+  }
+  if (meaning.trim()) {
+    lines.push('**What it represents**', meaning.trim(), '');
+  }
+  if (reflection.trim()) {
+    lines.push('**Reflection**', reflection.trim(), '');
+  }
+  return lines.join('\n').trim();
+}
+
+async function saveActiveImagination(
+  responses: Record<string, string>,
+  startedAt: Date,
+): Promise<void> {
+  const now = new Date();
+  const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
+  const content = formatActiveImaginationJournal(responses);
+
+  await Promise.all([
+    db.exerciseCompletions.add({
+      id: crypto.randomUUID(),
+      exerciseId: 'active-imagination',
+      responses,
+      completedAt: now,
+      durationSeconds,
+    }),
+    db.journalEntries.add({
+      id: crypto.randomUUID(),
+      content,
+      exerciseId: 'active-imagination',
+      tags: ['exercise', 'active-imagination', 'encounter'],
+      createdAt: now,
+      updatedAt: now,
+    }),
+  ]);
+  await recalculateStreak();
+}
+
 // ─── Dream Log helpers ────────────────────────────────────────────────────────
 
 /**
@@ -236,6 +292,10 @@ export default function ExerciseSession() {
   function handleSaveReflections(responses: Record<string, string>) {
     if (ex.id === 'inner-child') {
       void saveInnerChildLetter(responses, mountedAt).then(() => {
+        navigate('/journal');
+      });
+    } else if (ex.id === 'active-imagination') {
+      void saveActiveImagination(responses, mountedAt).then(() => {
         navigate('/journal');
       });
     } else if (ex.id === 'trigger-tracking') {

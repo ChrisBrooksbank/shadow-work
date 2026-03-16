@@ -44,6 +44,8 @@ export interface TimedPauseStep {
   id: string;
   label: string;
   durationSeconds: number;
+  /** When true, renders a breathing/ambient animation for meditation steps. */
+  ambient?: boolean;
 }
 
 export interface ChoiceStep {
@@ -338,6 +340,7 @@ export const exercises: Exercise[] = [
         id: 'ai-meditation',
         label: 'Receptive meditation',
         durationSeconds: 300,
+        ambient: true,
       },
       {
         type: 'prompt',
