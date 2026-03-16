@@ -80,7 +80,7 @@
 
 ### Phase 9 — PWA & Notifications
 
-- [ ] Configure vite-plugin-pwa service worker: cache app shell + assets offline, runtime caching for fonts (spec: phase-9-pwa-notifications.md)
+- [x] Configure vite-plugin-pwa service worker: cache app shell + assets offline, runtime caching for fonts (spec: phase-9-pwa-notifications.md)
 - [ ] Create PWA icons: 192x192, 512x512, maskable variant in public/icons/ (spec: phase-9-pwa-notifications.md)
 - [ ] Build useInstallPrompt hook + custom install prompt UI (shows after onboarding + first check-in, dismissible, no nag) (spec: phase-9-pwa-notifications.md)
 - [ ] Build useNotifications hook: request permission, schedule daily local push notification at user-configured time with rotating one-liners (spec: phase-9-pwa-notifications.md)
