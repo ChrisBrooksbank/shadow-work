@@ -157,3 +157,74 @@ describe('ExerciseSession', () => {
     });
   });
 });
+
+describe('ExerciseSession — inner-child', () => {
+  it('Done stores completion and navigates to /exercises', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      expect(completions).toHaveLength(1);
+      expect(completions[0]!.exerciseId).toBe('inner-child');
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+    });
+  });
+
+  it('Save to journal stores completion AND a journal entry with letter tag', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      const journals = await db.journalEntries.toArray();
+      expect(completions).toHaveLength(1);
+      expect(journals).toHaveLength(1);
+      expect(journals[0]!.tags).toContain('letter');
+    });
+  });
+
+  it('Save to journal formats the entry under "Letter to My Younger Self"', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.content).toContain('Letter to My Younger Self');
+    });
+  });
+
+  it('Save to journal uses the inner-child letter format (not the generic bundler)', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      // The inner-child formatter produces a "Letter to My Younger Self" heading,
+      // confirming it uses the specialized format rather than the generic bundler.
+      expect(journals[0]!.content).toContain('Letter to My Younger Self');
+    });
+  });
+
+  it('Save to journal navigates to /journal', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+    });
+  });
+
+  it('Save to journal links the entry to the inner-child exercise', async () => {
+    renderForExercise('inner-child');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.exerciseId).toBe('inner-child');
+    });
+  });
+});

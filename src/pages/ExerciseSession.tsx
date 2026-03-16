@@ -98,6 +98,62 @@ async function saveTriggerLog(responses: Record<string, string>): Promise<void> 
   });
 }
 
+// ─── Inner Child helpers ──────────────────────────────────────────────────────
+
+/**
+ * Format inner-child responses into a journal entry with the letter as the
+ * primary content.
+ */
+function formatInnerChildJournal(responses: Record<string, string>): string {
+  const age = responses['ic-age'] ?? '';
+  const whatNeeded = responses['ic-what-needed'] ?? '';
+  const letter = responses['ic-letter'] ?? '';
+  const reflection = responses['ic-reflection'] ?? '';
+
+  const lines: string[] = ['# Letter to My Younger Self', ''];
+  if (age.trim()) {
+    lines.push('**About that time**', age.trim(), '');
+  }
+  if (whatNeeded.trim()) {
+    lines.push('**What they needed**', whatNeeded.trim(), '');
+  }
+  if (letter.trim()) {
+    lines.push('**The letter**', letter.trim(), '');
+  }
+  if (reflection.trim()) {
+    lines.push('**Reflection**', reflection.trim(), '');
+  }
+  return lines.join('\n').trim();
+}
+
+async function saveInnerChildLetter(
+  responses: Record<string, string>,
+  startedAt: Date,
+): Promise<void> {
+  const now = new Date();
+  const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
+  const content = formatInnerChildJournal(responses);
+
+  await Promise.all([
+    db.exerciseCompletions.add({
+      id: crypto.randomUUID(),
+      exerciseId: 'inner-child',
+      responses,
+      completedAt: now,
+      durationSeconds,
+    }),
+    db.journalEntries.add({
+      id: crypto.randomUUID(),
+      content,
+      exerciseId: 'inner-child',
+      tags: ['exercise', 'inner-child', 'letter'],
+      createdAt: now,
+      updatedAt: now,
+    }),
+  ]);
+  await recalculateStreak();
+}
+
 // ─── Dream Log helpers ────────────────────────────────────────────────────────
 
 /**
@@ -178,7 +234,11 @@ export default function ExerciseSession() {
   }
 
   function handleSaveReflections(responses: Record<string, string>) {
-    if (ex.id === 'trigger-tracking') {
+    if (ex.id === 'inner-child') {
+      void saveInnerChildLetter(responses, mountedAt).then(() => {
+        navigate('/journal');
+      });
+    } else if (ex.id === 'trigger-tracking') {
       void Promise.all([
         saveCompletionWithJournal(ex, responses, mountedAt),
         saveTriggerLog(responses),
