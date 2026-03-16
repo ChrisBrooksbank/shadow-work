@@ -1,4 +1,4 @@
-import { useStreak, useProgressStats, useActivityByDate } from '../db/hooks';
+import { useStreak, useProgressStats, useActivityByDate, useTriggerPatterns } from '../db/hooks';
 import type { ExerciseCategory } from '../data/exercises';
 import CalendarHeatmap from '../components/ui/CalendarHeatmap';
 import styles from './Progress.module.css';
@@ -31,8 +31,14 @@ export default function Progress() {
   const streak = useStreak();
   const stats = useProgressStats();
   const activityByDate = useActivityByDate();
+  const triggerPatterns = useTriggerPatterns();
 
-  if (streak === undefined || stats === undefined || activityByDate === undefined) {
+  if (
+    streak === undefined ||
+    stats === undefined ||
+    activityByDate === undefined ||
+    triggerPatterns === undefined
+  ) {
     return (
       <main className={styles.page}>
         <p className={styles.loading}>Loading…</p>
@@ -150,6 +156,87 @@ export default function Progress() {
               </p>
             )}
           </section>
+
+          {/* ─── Trigger analytics ──────────────────────────────────── */}
+          {triggerPatterns.totalLogs > 0 && (
+            <section aria-label="Trigger analytics">
+              <p className={styles.sectionLabel}>Trigger patterns</p>
+
+              {/* Average intensity */}
+              <div className={styles.statRow} style={{ marginBottom: 'var(--space-5)' }}>
+                <div className={styles.statCard}>
+                  <p className={styles.statValue}>{triggerPatterns.averageIntensity.toFixed(1)}</p>
+                  <p className={styles.statLabel}>Avg intensity</p>
+                </div>
+                <div className={styles.statCard}>
+                  <p className={styles.statValue}>{triggerPatterns.totalLogs}</p>
+                  <p className={styles.statLabel}>Trigger logs</p>
+                </div>
+              </div>
+
+              {/* Top emotions */}
+              {Object.keys(triggerPatterns.emotionCounts).length > 0 && (
+                <div className={styles.analyticsSubsection}>
+                  <p className={styles.analyticsSubLabel}>Common emotions</p>
+                  <div className={styles.categoryList}>
+                    {Object.entries(triggerPatterns.emotionCounts)
+                      .sort(([, a], [, b]) => b - a)
+                      .slice(0, 5)
+                      .map(([emotion, count]) => {
+                        const maxEmotion = Math.max(
+                          ...Object.values(triggerPatterns.emotionCounts),
+                        );
+                        return (
+                          <div key={emotion} className={styles.categoryRow}>
+                            <div className={styles.categoryMeta}>
+                              <span className={styles.categoryName}>{emotion}</span>
+                              <span className={styles.categoryCount}>{count}</span>
+                            </div>
+                            <div className={styles.barTrack} aria-hidden="true">
+                              <div
+                                className={styles.barFill}
+                                style={{ width: `${(count / maxEmotion) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Top body locations */}
+              {Object.keys(triggerPatterns.bodyKeywordCounts).length > 0 && (
+                <div className={styles.analyticsSubsection}>
+                  <p className={styles.analyticsSubLabel}>Body locations</p>
+                  <div className={styles.categoryList}>
+                    {Object.entries(triggerPatterns.bodyKeywordCounts)
+                      .sort(([, a], [, b]) => b - a)
+                      .slice(0, 5)
+                      .map(([location, count]) => {
+                        const maxLocation = Math.max(
+                          ...Object.values(triggerPatterns.bodyKeywordCounts),
+                        );
+                        return (
+                          <div key={location} className={styles.categoryRow}>
+                            <div className={styles.categoryMeta}>
+                              <span className={styles.categoryName}>{location}</span>
+                              <span className={styles.categoryCount}>{count}</span>
+                            </div>
+                            <div className={styles.barTrack} aria-hidden="true">
+                              <div
+                                className={styles.barFill}
+                                style={{ width: `${(count / maxLocation) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
         </>
       )}
     </main>

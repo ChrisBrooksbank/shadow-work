@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Progress from './Progress';
 import type { StreakRecord } from '../db/schema';
-import type { ProgressStats } from '../db/hooks';
+import type { ProgressStats, TriggerPattern } from '../db/hooks';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -11,6 +11,7 @@ vi.mock('../db/hooks', () => ({
   useStreak: vi.fn(),
   useProgressStats: vi.fn(),
   useActivityByDate: vi.fn(),
+  useTriggerPatterns: vi.fn(),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,6 +36,15 @@ const makeStats = (overrides: Partial<ProgressStats> = {}): ProgressStats => ({
   ...overrides,
 });
 
+const makeTriggerPattern = (overrides: Partial<TriggerPattern> = {}): TriggerPattern => ({
+  totalLogs: 0,
+  emotionCounts: {},
+  averageIntensity: 0,
+  bodyKeywordCounts: {},
+  recentLogs: [],
+  ...overrides,
+});
+
 function renderPage() {
   return render(
     <MemoryRouter>
@@ -51,6 +61,7 @@ beforeEach(() => {
   vi.mocked(hooks.useStreak).mockReturnValue(makeStreak());
   vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats());
   vi.mocked(hooks.useActivityByDate).mockReturnValue(emptyActivity);
+  vi.mocked(hooks.useTriggerPatterns).mockReturnValue(makeTriggerPattern());
 });
 
 describe('Progress page', () => {
@@ -63,6 +74,7 @@ describe('Progress page', () => {
     vi.mocked(hooks.useStreak).mockReturnValue(undefined);
     vi.mocked(hooks.useProgressStats).mockReturnValue(undefined);
     vi.mocked(hooks.useActivityByDate).mockReturnValue(undefined);
+    vi.mocked(hooks.useTriggerPatterns).mockReturnValue(undefined);
     renderPage();
     expect(screen.getByText('Loading…')).toBeInTheDocument();
   });
@@ -149,5 +161,65 @@ describe('Progress page', () => {
     renderPage();
     expect(screen.getByText('Streaks')).toBeInTheDocument();
     expect(screen.getByText('Writing')).toBeInTheDocument();
+  });
+
+  it('does not show trigger analytics section when there are no trigger logs', () => {
+    vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+    vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+    vi.mocked(hooks.useTriggerPatterns).mockReturnValue(makeTriggerPattern({ totalLogs: 0 }));
+    renderPage();
+    expect(screen.queryByText('Trigger patterns')).not.toBeInTheDocument();
+  });
+
+  it('shows trigger analytics section when trigger logs exist', () => {
+    vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 2 }));
+    vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+    vi.mocked(hooks.useTriggerPatterns).mockReturnValue(
+      makeTriggerPattern({
+        totalLogs: 3,
+        averageIntensity: 6.5,
+        emotionCounts: { fear: 2, anger: 1 },
+        bodyKeywordCounts: { chest: 2, throat: 1 },
+      }),
+    );
+    renderPage();
+    expect(screen.getByText('Trigger patterns')).toBeInTheDocument();
+    expect(screen.getByText('Avg intensity')).toBeInTheDocument();
+    expect(screen.getByText('6.5')).toBeInTheDocument();
+    expect(screen.getByText('Trigger logs')).toBeInTheDocument();
+  });
+
+  it('shows top emotions in trigger analytics', () => {
+    vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+    vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+    vi.mocked(hooks.useTriggerPatterns).mockReturnValue(
+      makeTriggerPattern({
+        totalLogs: 2,
+        averageIntensity: 5,
+        emotionCounts: { shame: 2, grief: 1 },
+        bodyKeywordCounts: {},
+      }),
+    );
+    renderPage();
+    expect(screen.getByText('Common emotions')).toBeInTheDocument();
+    expect(screen.getByText('shame')).toBeInTheDocument();
+    expect(screen.getByText('grief')).toBeInTheDocument();
+  });
+
+  it('shows top body locations in trigger analytics', () => {
+    vi.mocked(hooks.useStreak).mockReturnValue(makeStreak({ totalActiveDays: 1 }));
+    vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats({ journalEntryCount: 1 }));
+    vi.mocked(hooks.useTriggerPatterns).mockReturnValue(
+      makeTriggerPattern({
+        totalLogs: 1,
+        averageIntensity: 7,
+        emotionCounts: {},
+        bodyKeywordCounts: { stomach: 1, jaw: 1 },
+      }),
+    );
+    renderPage();
+    expect(screen.getByText('Body locations')).toBeInTheDocument();
+    expect(screen.getByText('stomach')).toBeInTheDocument();
+    expect(screen.getByText('jaw')).toBeInTheDocument();
   });
 });
