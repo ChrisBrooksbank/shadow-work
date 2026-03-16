@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import DailyCheckIn from './pages/DailyCheckIn';
 import DreamJournal from './pages/DreamJournal';
@@ -13,10 +14,31 @@ import Onboarding from './pages/Onboarding';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import TriggerPatterns from './pages/TriggerPatterns';
+import { useUserSettings } from './db/hooks';
+
+/** Redirects to /onboarding on first launch (when no settings or onboardingComplete is false). */
+function OnboardingGuard() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const settings = useUserSettings();
+
+  useEffect(() => {
+    if (
+      settings !== undefined &&
+      settings?.onboardingComplete !== true &&
+      location.pathname !== '/onboarding'
+    ) {
+      navigate('/onboarding', { replace: true });
+    }
+  }, [settings, navigate, location.pathname]);
+
+  return null;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
+      <OnboardingGuard />
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />

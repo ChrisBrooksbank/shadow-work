@@ -253,6 +253,13 @@ export function useActivityByDate(): ActivityByDate | undefined {
   return useLiveQuery(() => queryActivityByDate(), []);
 }
 
+// ─── User Settings ─────────────────────────────────────────────────────────────
+
+/** Reactive hook — returns user settings, null if not yet created, undefined while loading. */
+export function useUserSettings(): import('./schema').UserSettings | null | undefined {
+  return useLiveQuery(() => db.userSettings.get('settings').then((s) => s ?? null), [], undefined);
+}
+
 // ─── Stage Progress ────────────────────────────────────────────────────────────
 
 import type { ExerciseStage } from '../data/exercises';
