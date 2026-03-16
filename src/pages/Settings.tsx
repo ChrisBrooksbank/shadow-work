@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import { db } from '../db';
+import { useNotifications } from '../hooks/useNotifications';
 import styles from './Settings.module.css';
 
 const APP_VERSION = '0.1.0';
@@ -160,6 +161,9 @@ export default function Settings() {
   const [clearModalOpen, setClearModalOpen] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  const { permission, enabled, reminderTime, requestPermission, setEnabled, setReminderTime } =
+    useNotifications();
+
   function showStatus(type: 'success' | 'error', message: string) {
     setStatus({ type, message });
     setTimeout(() => setStatus(null), 4000);
@@ -213,6 +217,23 @@ export default function Settings() {
     } catch {
       showStatus('error', 'Clear failed. Please try again.');
     }
+  }
+
+  async function handleNotificationToggle(checked: boolean) {
+    if (!checked) {
+      setEnabled(false);
+      return;
+    }
+    if (permission === 'default') {
+      await requestPermission();
+      // After requesting, hook updates permission state; setEnabled only if now granted
+      if (Notification.permission === 'granted') {
+        setEnabled(true);
+      }
+    } else if (permission === 'granted') {
+      setEnabled(true);
+    }
+    // if denied, do nothing — the UI shows a blocked message
   }
 
   return (
@@ -288,6 +309,63 @@ export default function Settings() {
               Clear
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Notifications ──────────────────────────────────────── */}
+      <section aria-labelledby="notifications-heading">
+        <p className={styles.sectionLabel} id="notifications-heading">
+          Notifications
+        </p>
+        <div className={styles.actionList}>
+          <div className={styles.actionRow}>
+            <div className={styles.actionMeta}>
+              <span className={styles.actionTitle}>Daily reminder</span>
+              <span className={styles.actionDesc}>
+                Receive a daily prompt to engage in shadow work practice.
+              </span>
+            </div>
+            {permission === 'denied' ? (
+              <span className={styles.blockedBadge}>Blocked</span>
+            ) : (
+              <label className={styles.toggleLabel} aria-label="Enable daily reminder">
+                <input
+                  type="checkbox"
+                  className={styles.toggleInput}
+                  checked={enabled}
+                  onChange={(e) => void handleNotificationToggle(e.target.checked)}
+                />
+                <span className={styles.toggleTrack} aria-hidden="true">
+                  <span className={styles.toggleThumb} />
+                </span>
+              </label>
+            )}
+          </div>
+
+          {permission === 'denied' && (
+            <div className={styles.actionRow}>
+              <p className={styles.deniedNote}>
+                Notifications are blocked in your browser settings. Enable them there to use this
+                feature.
+              </p>
+            </div>
+          )}
+
+          {permission === 'granted' && enabled && (
+            <div className={styles.actionRow}>
+              <div className={styles.actionMeta}>
+                <span className={styles.actionTitle}>Reminder time</span>
+                <span className={styles.actionDesc}>When to receive your daily prompt.</span>
+              </div>
+              <input
+                type="time"
+                className={styles.timeInput}
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                aria-label="Reminder time"
+              />
+            </div>
+          )}
         </div>
       </section>
 

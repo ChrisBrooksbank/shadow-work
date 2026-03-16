@@ -3,6 +3,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Settings from './Settings';
 
+// ─── Notification mock ────────────────────────────────────────────────────────
+
+const mockNotificationConstructor = vi.fn();
+
+function setupNotificationMock(
+  permission: NotificationPermission = 'default',
+  requestResult: NotificationPermission = 'granted',
+) {
+  const MockNotification = Object.assign(mockNotificationConstructor, {
+    permission,
+    requestPermission: vi.fn().mockResolvedValue(requestResult),
+  });
+  Object.defineProperty(window, 'Notification', {
+    value: MockNotification,
+    writable: true,
+    configurable: true,
+  });
+}
+
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('../db', () => {
@@ -44,6 +63,8 @@ function renderPage() {
 
 beforeEach(async () => {
   vi.clearAllMocks();
+  localStorage.clear();
+  setupNotificationMock();
   const { db } = await import('../db');
   const tables = [
     db.journalEntries,
@@ -223,6 +244,76 @@ describe('Settings page', () => {
       fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
       expect(screen.queryByRole('dialog', { name: /import data/i })).not.toBeInTheDocument();
       expect(db.journalEntries.bulkPut).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('notification settings', () => {
+    it('renders notifications section', () => {
+      renderPage();
+      expect(screen.getByText(/daily reminder/i)).toBeInTheDocument();
+    });
+
+    it('renders a disabled toggle by default', () => {
+      renderPage();
+      const toggle = screen.getByRole('checkbox', { name: /enable daily reminder/i });
+      expect(toggle).not.toBeChecked();
+    });
+
+    it('requests permission and enables notifications when toggle is turned on with default permission', async () => {
+      setupNotificationMock('default', 'granted');
+      renderPage();
+      const toggle = screen.getByRole('checkbox', { name: /enable daily reminder/i });
+      fireEvent.click(toggle);
+      await waitFor(() => {
+        expect(window.Notification.requestPermission).toHaveBeenCalled();
+      });
+    });
+
+    it('enables notifications directly when permission is already granted', async () => {
+      setupNotificationMock('granted');
+      renderPage();
+      const toggle = screen.getByRole('checkbox', { name: /enable daily reminder/i });
+      fireEvent.click(toggle);
+      await waitFor(() => {
+        expect(toggle).toBeChecked();
+      });
+    });
+
+    it('shows time picker when enabled and permission is granted', async () => {
+      setupNotificationMock('granted');
+      renderPage();
+      const toggle = screen.getByRole('checkbox', { name: /enable daily reminder/i });
+      fireEvent.click(toggle);
+      await waitFor(() => {
+        expect(screen.getByLabelText(/reminder time/i)).toBeInTheDocument();
+      });
+    });
+
+    it('hides time picker when notifications are disabled', () => {
+      renderPage();
+      expect(screen.queryByLabelText(/reminder time/i)).not.toBeInTheDocument();
+    });
+
+    it('shows blocked message when permission is denied', () => {
+      setupNotificationMock('denied');
+      renderPage();
+      expect(screen.getByText(/notifications are blocked/i)).toBeInTheDocument();
+      expect(
+        screen.queryByRole('checkbox', { name: /enable daily reminder/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('updates reminder time when time input changes', async () => {
+      setupNotificationMock('granted');
+      renderPage();
+      const toggle = screen.getByRole('checkbox', { name: /enable daily reminder/i });
+      fireEvent.click(toggle);
+      await waitFor(() => {
+        expect(screen.getByLabelText(/reminder time/i)).toBeInTheDocument();
+      });
+      const timeInput = screen.getByLabelText(/reminder time/i);
+      fireEvent.change(timeInput, { target: { value: '09:00' } });
+      expect((timeInput as HTMLInputElement).value).toBe('09:00');
     });
   });
 });
