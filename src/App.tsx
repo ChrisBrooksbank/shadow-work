@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import DailyCheckIn from './pages/DailyCheckIn';
+import DreamJournal from './pages/DreamJournal';
 import ExerciseSession from './pages/ExerciseSession';
 import Exercises from './pages/Exercises';
 import Home from './pages/Home';
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/check-in" element={<DailyCheckIn />} />
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercises/trigger-patterns" element={<TriggerPatterns />} />
+          <Route path="/exercises/dream-journal" element={<DreamJournal />} />
           <Route path="/exercises/:id" element={<ExerciseSession />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/journal/new" element={<JournalEntry />} />

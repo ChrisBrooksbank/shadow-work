@@ -163,3 +163,10 @@ export function useTriggerLogs(): TriggerLog[] | undefined {
 export function useTriggerPatterns(): TriggerPattern | undefined {
   return useLiveQuery(() => queryTriggerPatterns(), []);
 }
+
+// ─── Dream Entries ─────────────────────────────────────────────────────────────
+
+/** Reactive hook — returns all dream entries sorted newest-first. */
+export function useDreamEntries(): import('./schema').DreamEntry[] | undefined {
+  return useLiveQuery(() => db.dreamEntries.orderBy('createdAt').reverse().toArray(), []);
+}

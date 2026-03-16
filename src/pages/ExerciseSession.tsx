@@ -3,7 +3,7 @@ import { exercises } from '../data/exercises';
 import ExerciseShell from '../components/exercise/ExerciseShell';
 import { db } from '../db/index';
 import { recalculateStreak } from '../db/streak';
-import type { TriggerLog } from '../db/schema';
+import type { DreamEntry, TriggerLog } from '../db/schema';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +98,41 @@ async function saveTriggerLog(responses: Record<string, string>): Promise<void> 
   });
 }
 
+// ─── Dream Log helpers ────────────────────────────────────────────────────────
+
+/**
+ * Split a freeform comma/newline/semicolon list into individual items,
+ * trimming whitespace and filtering blanks.
+ */
+function splitList(text: string): string[] {
+  return text
+    .split(/[,;\n]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Parse dream-work exercise responses into structured DreamEntry fields.
+ */
+function parseDreamEntry(responses: Record<string, string>): Omit<DreamEntry, 'id' | 'createdAt'> {
+  const content = responses['dw-record'] ?? '';
+  const figures = splitList(responses['dw-figures'] ?? '');
+  const emotions = splitList(responses['dw-emotion'] ?? '');
+  const analysisParts = [responses['dw-shadow-figure'], responses['dw-reflection']].filter(Boolean);
+  const analysisNotes = analysisParts.join('\n\n') || undefined;
+
+  return { content, figures, emotions, analysisNotes };
+}
+
+async function saveDreamEntry(responses: Record<string, string>): Promise<void> {
+  const parsed = parseDreamEntry(responses);
+  await db.dreamEntries.add({
+    id: crypto.randomUUID(),
+    ...parsed,
+    createdAt: new Date(),
+  });
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ExerciseSession() {
@@ -128,6 +163,13 @@ export default function ExerciseSession() {
       ]).then(() => {
         navigate('/exercises/trigger-patterns');
       });
+    } else if (ex.id === 'dream-work') {
+      void Promise.all([
+        saveCompletion(ex.id, responses, mountedAt),
+        saveDreamEntry(responses),
+      ]).then(() => {
+        navigate('/exercises/dream-journal');
+      });
     } else {
       void saveCompletion(ex.id, responses, mountedAt).then(() => {
         navigate('/exercises');
@@ -142,6 +184,13 @@ export default function ExerciseSession() {
         saveTriggerLog(responses),
       ]).then(() => {
         navigate('/exercises/trigger-patterns');
+      });
+    } else if (ex.id === 'dream-work') {
+      void Promise.all([
+        saveCompletionWithJournal(ex, responses, mountedAt),
+        saveDreamEntry(responses),
+      ]).then(() => {
+        navigate('/exercises/dream-journal');
       });
     } else {
       void saveCompletionWithJournal(ex, responses, mountedAt).then(() => {
