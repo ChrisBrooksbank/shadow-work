@@ -16,6 +16,7 @@ vi.mock('../db/hooks', () => ({
   useStreak: vi.fn(),
   useTodaysCheckIn: vi.fn(),
   useRecentActivity: vi.fn(),
+  useCheckInCount: vi.fn(() => 0),
   todayDateString: vi.fn(() => '2026-03-15'),
 }));
 

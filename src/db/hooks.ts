@@ -253,6 +253,13 @@ export function useActivityByDate(): ActivityByDate | undefined {
   return useLiveQuery(() => queryActivityByDate(), []);
 }
 
+// ─── Check-In Count ────────────────────────────────────────────────────────────
+
+/** Reactive hook — returns total number of daily check-ins ever recorded. */
+export function useCheckInCount(): number | undefined {
+  return useLiveQuery(() => db.dailyCheckIns.count(), []);
+}
+
 // ─── User Settings ─────────────────────────────────────────────────────────────
 
 /** Reactive hook — returns user settings, null if not yet created, undefined while loading. */

@@ -1,9 +1,16 @@
 import { useNavigate } from 'react-router-dom';
-import { useStreak, useTodaysCheckIn, useRecentActivity, todayDateString } from '../db/hooks';
+import {
+  useStreak,
+  useTodaysCheckIn,
+  useRecentActivity,
+  useCheckInCount,
+  todayDateString,
+} from '../db/hooks';
 import { getDailyQuestion } from '../data/daily-questions';
 import StreakDisplay from '../components/ui/StreakDisplay';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import InstallPrompt from '../components/InstallPrompt';
 import styles from './Home.module.css';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,6 +42,7 @@ export default function Home() {
   const streak = useStreak();
   const todaysCheckIn = useTodaysCheckIn();
   const recentActivity = useRecentActivity(5);
+  const checkInCount = useCheckInCount() ?? 0;
 
   const question = getDailyQuestion(todayDateString());
   const checkInDone = todaysCheckIn != null;
@@ -113,6 +121,8 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <InstallPrompt checkInCount={checkInCount} />
     </main>
   );
 }
