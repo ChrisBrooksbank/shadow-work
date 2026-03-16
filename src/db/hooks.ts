@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './index';
 import type { DailyCheckIn, StreakRecord, TriggerLog } from './schema';
+import type { ExerciseCategory } from '../data/exercises';
+import { exercises } from '../data/exercises';
 
 const DEFAULT_STREAK: StreakRecord = {
   key: 'current',
@@ -169,4 +171,46 @@ export function useTriggerPatterns(): TriggerPattern | undefined {
 /** Reactive hook — returns all dream entries sorted newest-first. */
 export function useDreamEntries(): import('./schema').DreamEntry[] | undefined {
   return useLiveQuery(() => db.dreamEntries.orderBy('createdAt').reverse().toArray(), []);
+}
+
+// ─── Progress Stats ─────────────────────────────────────────────────────────────
+
+export interface ProgressStats {
+  totalExercises: number;
+  exerciseCountsByCategory: Partial<Record<ExerciseCategory, number>>;
+  mostPracticedCategory: ExerciseCategory | null;
+  journalEntryCount: number;
+}
+
+async function queryProgressStats(): Promise<ProgressStats> {
+  const [completions, journalEntryCount] = await Promise.all([
+    db.exerciseCompletions.toArray(),
+    db.journalEntries.count(),
+  ]);
+
+  const exerciseCountsByCategory: Partial<Record<ExerciseCategory, number>> = {};
+  for (const completion of completions) {
+    const exercise = exercises.find((e) => e.id === completion.exerciseId);
+    if (exercise) {
+      exerciseCountsByCategory[exercise.category] =
+        (exerciseCountsByCategory[exercise.category] ?? 0) + 1;
+    }
+  }
+
+  const mostPracticedEntry = Object.entries(exerciseCountsByCategory).sort(
+    ([, a], [, b]) => (b ?? 0) - (a ?? 0),
+  )[0];
+  const mostPracticedCategory = (mostPracticedEntry?.[0] as ExerciseCategory) ?? null;
+
+  return {
+    totalExercises: completions.length,
+    exerciseCountsByCategory,
+    mostPracticedCategory,
+    journalEntryCount,
+  };
+}
+
+/** Reactive hook — returns aggregated progress statistics. */
+export function useProgressStats(): ProgressStats | undefined {
+  return useLiveQuery(() => queryProgressStats(), []);
 }
