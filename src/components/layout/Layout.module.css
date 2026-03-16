@@ -1,11 +1,12 @@
 .shell {
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
+  height: 100svh;
 }
 
 .content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
 }
