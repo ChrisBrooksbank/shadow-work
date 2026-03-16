@@ -60,7 +60,7 @@
 
 ### Phase 6 — Learn
 
-- [ ] Create src/data/concepts.ts with all 8 topics (slug, title, summary, body, relatedExerciseIds, readingTime) rewritten from research.md in direct 2nd-person tone (spec: phase-6-learn.md)
+- [x] Create src/data/concepts.ts with all 8 topics (slug, title, summary, body, relatedExerciseIds, readingTime) rewritten from research.md in direct 2nd-person tone (spec: phase-6-learn.md)
 - [ ] Build Learn grid page — card layout of all topics with summaries (spec: phase-6-learn.md)
 - [ ] Build LearnTopic page — single topic deep-dive with readable typography, section headings, "Try this exercise" links, "Next topic" navigation (spec: phase-6-learn.md)
 
