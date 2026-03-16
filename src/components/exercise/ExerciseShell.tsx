@@ -140,7 +140,12 @@ export default function ExerciseShell({
             </span>
           </div>
 
-          <h1 className={styles.introTitle}>{exercise.title}</h1>
+          <h1
+            className={`${styles.introTitle} glitch glitch-layers glitch-text`}
+            data-text={exercise.title}
+          >
+            {exercise.title}
+          </h1>
           <p className={styles.introTagline}>{exercise.tagline}</p>
           <p className={styles.introDescription}>{exercise.description}</p>
 
@@ -325,7 +330,17 @@ export default function ExerciseShell({
         </div>
       )}
 
-      <div className={styles.body}>{content}</div>
+      <div className={styles.body}>
+        <motion.div
+          key={`${flow.phase}-${flow.currentStepIndex}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+        >
+          {content}
+        </motion.div>
+      </div>
 
       {groundingOpen && <GroundingOverlay onClose={() => setGroundingOpen(false)} />}
     </motion.div>,

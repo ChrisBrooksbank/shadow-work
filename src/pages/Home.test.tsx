@@ -54,6 +54,13 @@ beforeEach(() => {
 });
 
 describe('Home page', () => {
+  it('renders the app title with glitch effect', () => {
+    renderPage();
+    const title = screen.getByRole('heading', { level: 1, name: /shadow/i });
+    expect(title).toBeInTheDocument();
+    expect(title).toHaveClass('glitch');
+  });
+
   it('renders the daily question', () => {
     renderPage();
     expect(screen.getByText('What quality in others irritates you most?')).toBeInTheDocument();

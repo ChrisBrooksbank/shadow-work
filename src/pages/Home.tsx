@@ -41,6 +41,13 @@ export default function Home() {
 
   return (
     <main className={styles.page}>
+      {/* ─── App title ──────────────────────────────────── */}
+      <header className={styles.appHeader}>
+        <h1 className={`${styles.appTitle} glitch glitch-layers glitch-text`} data-text="SHADOW">
+          SHADOW
+        </h1>
+      </header>
+
       {/* ─── Daily question ─────────────────────────────── */}
       <section className={styles.questionSection}>
         <p className={styles.sectionLabel}>Today&apos;s question</p>

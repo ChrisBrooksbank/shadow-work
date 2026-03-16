@@ -6,6 +6,23 @@
   gap: var(--space-8);
 }
 
+/* ─── App title ─────────────────────────────────────── */
+
+.appHeader {
+  display: flex;
+  align-items: center;
+}
+
+.appTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+}
+
 /* ─── Section label ──────────────────────────────────── */
 
 .sectionLabel {
