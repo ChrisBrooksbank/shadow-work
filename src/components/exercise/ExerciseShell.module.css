@@ -40,8 +40,26 @@
 }
 
 .backButton:hover,
-.closeButton:hover {
+.closeButton:hover,
+.groundButton:hover {
   color: var(--text-primary);
+}
+
+.groundButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color 0.15s ease;
 }
 
 .progressWrap {

@@ -56,7 +56,7 @@
 - [x] Inner Child Work guided flow: visualization prompts step-by-step, letter writing step with save (spec: phase-5-specialized-exercises.md)
 - [x] Active Imagination guided flow: meditation timer with ambient state, freewrite recording after meditation (spec: phase-5-specialized-exercises.md)
 - [x] Mirror Work guided flow: prompted self-confrontation sequence, timed holds with prompts (spec: phase-5-specialized-exercises.md)
-- [ ] Surface grounding technique as accessible overlay mid-exercise (spec: phase-5-specialized-exercises.md)
+- [x] Surface grounding technique as accessible overlay mid-exercise (spec: phase-5-specialized-exercises.md)
 
 ### Phase 6 — Learn
 

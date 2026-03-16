@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '../ui/Button';
 import ProgressBar from '../ui/ProgressBar';
 import StepRenderer from './StepRenderer';
+import GroundingOverlay from './GroundingOverlay';
 import { useExerciseFlow } from '../../hooks/useExerciseFlow';
 import type { Exercise, ExerciseDepth } from '../../data/exercises';
 import { hapticLight } from '../../lib/haptics';
@@ -76,6 +78,7 @@ export default function ExerciseShell({
   onSaveReflections,
 }: ExerciseShellProps) {
   const flow = useExerciseFlow(exercise);
+  const [groundingOpen, setGroundingOpen] = useState(false);
 
   function handleAdvance() {
     hapticLight();
@@ -256,6 +259,38 @@ export default function ExerciseShell({
               aria-label="Exercise progress"
             />
           </div>
+          <button
+            className={styles.groundButton}
+            onClick={() => {
+              hapticLight();
+              setGroundingOpen(true);
+            }}
+            aria-label="Open grounding techniques"
+            type="button"
+            title="Ground me"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+              <line
+                x1="9"
+                y1="1.5"
+                x2="9"
+                y2="16.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <line
+                x1="1.5"
+                y1="9"
+                x2="16.5"
+                y2="9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
           {flow.canGoBack && (
             <button
               className={styles.closeButton}
@@ -282,6 +317,8 @@ export default function ExerciseShell({
       )}
 
       <div className={styles.body}>{content}</div>
+
+      {groundingOpen && <GroundingOverlay onClose={() => setGroundingOpen(false)} />}
     </div>,
     document.body,
   );
