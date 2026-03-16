@@ -10,11 +10,13 @@ import type { ProgressStats } from '../db/hooks';
 vi.mock('../db/hooks', () => ({
   useStreak: vi.fn(),
   useProgressStats: vi.fn(),
+  useActivityByDate: vi.fn(),
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 import * as hooks from '../db/hooks';
+import type { ActivityByDate } from '../db/hooks';
 
 const makeStreak = (overrides: Partial<StreakRecord> = {}): StreakRecord => ({
   key: 'current',
@@ -43,9 +45,12 @@ function renderPage() {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
+const emptyActivity: ActivityByDate = {};
+
 beforeEach(() => {
   vi.mocked(hooks.useStreak).mockReturnValue(makeStreak());
   vi.mocked(hooks.useProgressStats).mockReturnValue(makeStats());
+  vi.mocked(hooks.useActivityByDate).mockReturnValue(emptyActivity);
 });
 
 describe('Progress page', () => {
@@ -57,6 +62,7 @@ describe('Progress page', () => {
   it('shows loading state while data is undefined', () => {
     vi.mocked(hooks.useStreak).mockReturnValue(undefined);
     vi.mocked(hooks.useProgressStats).mockReturnValue(undefined);
+    vi.mocked(hooks.useActivityByDate).mockReturnValue(undefined);
     renderPage();
     expect(screen.getByText('Loading…')).toBeInTheDocument();
   });

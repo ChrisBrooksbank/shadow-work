@@ -1,5 +1,6 @@
-import { useStreak, useProgressStats } from '../db/hooks';
+import { useStreak, useProgressStats, useActivityByDate } from '../db/hooks';
 import type { ExerciseCategory } from '../data/exercises';
+import CalendarHeatmap from '../components/ui/CalendarHeatmap';
 import styles from './Progress.module.css';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -29,8 +30,9 @@ const ALL_CATEGORIES: ExerciseCategory[] = [
 export default function Progress() {
   const streak = useStreak();
   const stats = useProgressStats();
+  const activityByDate = useActivityByDate();
 
-  if (streak === undefined || stats === undefined) {
+  if (streak === undefined || stats === undefined || activityByDate === undefined) {
     return (
       <main className={styles.page}>
         <p className={styles.loading}>Loading…</p>
@@ -81,6 +83,12 @@ export default function Progress() {
                 <p className={styles.statLabel}>Total days</p>
               </div>
             </div>
+          </section>
+
+          {/* ─── Activity heatmap ───────────────────────────────────── */}
+          <section>
+            <p className={styles.sectionLabel}>Activity</p>
+            <CalendarHeatmap activityByDate={activityByDate} />
           </section>
 
           {/* ─── Writing stats ──────────────────────────────────────── */}

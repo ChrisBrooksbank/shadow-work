@@ -214,3 +214,41 @@ async function queryProgressStats(): Promise<ProgressStats> {
 export function useProgressStats(): ProgressStats | undefined {
   return useLiveQuery(() => queryProgressStats(), []);
 }
+
+// ─── Activity By Date ──────────────────────────────────────────────────────────
+
+/** Maps YYYY-MM-DD date strings to activity counts (check-ins + journal entries + exercises). */
+export type ActivityByDate = Record<string, number>;
+
+function dateToKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+async function queryActivityByDate(): Promise<ActivityByDate> {
+  const [checkIns, journals, completions] = await Promise.all([
+    db.dailyCheckIns.toArray(),
+    db.journalEntries.toArray(),
+    db.exerciseCompletions.toArray(),
+  ]);
+
+  const result: ActivityByDate = {};
+
+  function addDate(date: Date) {
+    const key = dateToKey(date);
+    result[key] = (result[key] ?? 0) + 1;
+  }
+
+  checkIns.forEach((c) => addDate(c.createdAt));
+  journals.forEach((j) => addDate(j.createdAt));
+  completions.forEach((e) => addDate(e.completedAt));
+
+  return result;
+}
+
+/** Reactive hook — returns activity counts keyed by YYYY-MM-DD date string. */
+export function useActivityByDate(): ActivityByDate | undefined {
+  return useLiveQuery(() => queryActivityByDate(), []);
+}

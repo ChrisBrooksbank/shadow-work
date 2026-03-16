@@ -1,0 +1,102 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ─── Navigation ─────────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease;
+}
+
+.navBtn:hover:not(:disabled) {
+  color: var(--text-primary);
+}
+
+.navBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.monthLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Grid ───────────────────────────────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.dayHeader {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-align: center;
+  padding-bottom: var(--space-1);
+}
+
+.cell {
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-elevated);
+  transition: background-color 0.15s ease;
+  min-width: 0;
+}
+
+.cellEmpty {
+  aspect-ratio: 1;
+}
+
+.cellToday {
+  outline: 1px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.cellFuture {
+  background-color: var(--bg-raised) !important;
+  opacity: 0.4;
+}
+
+/* ─── Legend ─────────────────────────────────────────────── */
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.legendLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.legendCell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background-color: var(--bg-elevated);
+}
