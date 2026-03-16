@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import Button from '../ui/Button';
 import ProgressBar from '../ui/ProgressBar';
 import StepRenderer from './StepRenderer';
@@ -229,7 +230,15 @@ export default function ExerciseShell({
   })();
 
   return createPortal(
-    <div className={styles.shell} role="dialog" aria-modal="true" aria-label={exercise.title}>
+    <motion.div
+      className={styles.shell}
+      role="dialog"
+      aria-modal="true"
+      aria-label={exercise.title}
+      initial={{ opacity: 0, scale: 0.97, y: 32 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+    >
       {showHeader ? (
         <div className={styles.header}>
           {flow.canGoBack ? (
@@ -319,7 +328,7 @@ export default function ExerciseShell({
       <div className={styles.body}>{content}</div>
 
       {groundingOpen && <GroundingOverlay onClose={() => setGroundingOpen(false)} />}
-    </div>,
+    </motion.div>,
     document.body,
   );
 }

@@ -11,7 +11,7 @@ const variants = {
   exit: { opacity: 0, y: -8 },
 };
 
-const transition: Transition = { duration: 0.18, ease: 'easeInOut' };
+const transition: Transition = { duration: 0.22, ease: [0.25, 0.1, 0.25, 1] };
 
 export default function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();

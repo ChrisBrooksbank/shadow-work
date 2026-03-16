@@ -30,4 +30,14 @@ describe('PageTransition', () => {
     renderWithRouter('/journal');
     expect(screen.getByText('page content')).toBeInTheDocument();
   });
+
+  it('renders children on a deep route', () => {
+    renderWithRouter('/exercises/shadow-journaling');
+    expect(screen.getByText('page content')).toBeInTheDocument();
+  });
+
+  it('renders children on the root route', () => {
+    renderWithRouter('/');
+    expect(screen.getByText('page content')).toBeInTheDocument();
+  });
 });

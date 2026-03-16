@@ -74,7 +74,7 @@
 ### Phase 8 — Onboarding & Polish
 
 - [x] Build Onboarding flow: 3-4 swipeable framer-motion cards (intro shadow work, what app does, privacy promise), "Begin" button sets onboardingComplete in userSettings; redirect first-launch to /onboarding (spec: phase-8-onboarding-polish.md)
-- [ ] Polish page transitions: subtle slide/fade via AnimatePresence, dramatic reveal for exercise entry (spec: phase-8-onboarding-polish.md)
+- [x] Polish page transitions: subtle slide/fade via AnimatePresence, dramatic reveal for exercise entry (spec: phase-8-onboarding-polish.md)
 - [ ] Polish glitch effects: app title on Home, exercise transitions, daily question text (spec: phase-8-onboarding-polish.md)
 - [ ] Build Settings page: data export (JSON download), data import (merge/replace), clear all data (with confirmation modal), crisis resources, app version (spec: phase-8-onboarding-polish.md)
 
