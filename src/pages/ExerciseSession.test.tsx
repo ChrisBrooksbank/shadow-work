@@ -289,3 +289,62 @@ describe('ExerciseSession — active-imagination', () => {
     });
   });
 });
+
+describe('ExerciseSession — mirror-work', () => {
+  it('Done stores completion and navigates to /exercises', async () => {
+    renderForExercise('mirror-work');
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      expect(completions).toHaveLength(1);
+      expect(completions[0]!.exerciseId).toBe('mirror-work');
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+    });
+  });
+
+  it('Save to journal stores completion AND a journal entry with confrontation tag', async () => {
+    renderForExercise('mirror-work');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const completions = await db.exerciseCompletions.toArray();
+      const journals = await db.journalEntries.toArray();
+      expect(completions).toHaveLength(1);
+      expect(journals).toHaveLength(1);
+      expect(journals[0]!.tags).toContain('confrontation');
+    });
+  });
+
+  it('Save to journal formats the entry under "Mirror Work — The Confrontation"', async () => {
+    renderForExercise('mirror-work');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.content).toContain('Mirror Work — The Confrontation');
+    });
+  });
+
+  it('Save to journal links the entry to the mirror-work exercise', async () => {
+    renderForExercise('mirror-work');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.exerciseId).toBe('mirror-work');
+    });
+  });
+
+  it('Save to journal navigates to /journal', async () => {
+    renderForExercise('mirror-work');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+    });
+  });
+});

@@ -210,6 +210,55 @@ async function saveActiveImagination(
   await recalculateStreak();
 }
 
+// ─── Mirror Work helpers ──────────────────────────────────────────────────────
+
+/**
+ * Format mirror-work responses into a journal entry foregrounding the
+ * self-confrontation truth and compassion sections.
+ */
+function formatMirrorWorkJournal(responses: Record<string, string>): string {
+  const firstLook = responses['mw-first-look'] ?? '';
+  const whatSaid = responses['mw-what-said'] ?? '';
+  const reflection = responses['mw-reflection'] ?? '';
+
+  const lines: string[] = ['# Mirror Work — The Confrontation', ''];
+  if (firstLook.trim()) {
+    lines.push('**First look**', firstLook.trim(), '');
+  }
+  if (whatSaid.trim()) {
+    lines.push('**What I said to myself**', whatSaid.trim(), '');
+  }
+  if (reflection.trim()) {
+    lines.push('**Reflection**', reflection.trim(), '');
+  }
+  return lines.join('\n').trim();
+}
+
+async function saveMirrorWork(responses: Record<string, string>, startedAt: Date): Promise<void> {
+  const now = new Date();
+  const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
+  const content = formatMirrorWorkJournal(responses);
+
+  await Promise.all([
+    db.exerciseCompletions.add({
+      id: crypto.randomUUID(),
+      exerciseId: 'mirror-work',
+      responses,
+      completedAt: now,
+      durationSeconds,
+    }),
+    db.journalEntries.add({
+      id: crypto.randomUUID(),
+      content,
+      exerciseId: 'mirror-work',
+      tags: ['exercise', 'mirror-work', 'confrontation'],
+      createdAt: now,
+      updatedAt: now,
+    }),
+  ]);
+  await recalculateStreak();
+}
+
 // ─── Dream Log helpers ────────────────────────────────────────────────────────
 
 /**
@@ -296,6 +345,10 @@ export default function ExerciseSession() {
       });
     } else if (ex.id === 'active-imagination') {
       void saveActiveImagination(responses, mountedAt).then(() => {
+        navigate('/journal');
+      });
+    } else if (ex.id === 'mirror-work') {
+      void saveMirrorWork(responses, mountedAt).then(() => {
         navigate('/journal');
       });
     } else if (ex.id === 'trigger-tracking') {

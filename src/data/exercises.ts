@@ -406,16 +406,16 @@ export const exercises: Exercise[] = [
         placeholder: 'Describe without judgment...',
       },
       {
-        type: 'timed-pause',
-        id: 'mw-truth-hold',
-        label: "Hold your gaze — say what you've been afraid to say",
-        durationSeconds: 90,
-      },
-      {
         type: 'instruction',
         id: 'mw-truth-guide',
         title: 'During the pause:',
         body: "While looking in the mirror, speak aloud (or silently if you need to):\n\n\u2022 Something you've been ashamed to admit\n\u2022 Something you've been pretending isn't true\n\u2022 Something you've been hiding from people who love you\n\nStay with whatever arises. Don't look away.",
+      },
+      {
+        type: 'timed-pause',
+        id: 'mw-truth-hold',
+        label: "Hold your gaze — say what you've been afraid to say",
+        durationSeconds: 90,
       },
       {
         type: 'prompt',
@@ -424,16 +424,16 @@ export const exercises: Exercise[] = [
         placeholder: 'Write it down now...',
       },
       {
-        type: 'timed-pause',
-        id: 'mw-compassion-hold',
-        label: 'Hold your gaze — offer yourself compassion',
-        durationSeconds: 60,
-      },
-      {
         type: 'instruction',
         id: 'mw-compassion-guide',
         title: 'During the pause:',
         body: "Now look at yourself with the same eyes you'd use to look at someone you love.\n\nSay: \"I see you. I know what you're carrying. I'm not going to look away.\"\n\nOr whatever words feel true.",
+      },
+      {
+        type: 'timed-pause',
+        id: 'mw-compassion-hold',
+        label: 'Hold your gaze — offer yourself compassion',
+        durationSeconds: 60,
       },
       {
         type: 'reflection',
