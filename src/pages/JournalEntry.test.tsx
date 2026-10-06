@@ -164,6 +164,29 @@ describe('JournalEntry — new entry mode', () => {
     }
   });
 
+  it('flushes a pending save when leaving before the debounce fires', async () => {
+    vi.useFakeTimers();
+    try {
+      const { unmount } = renderNew();
+      const textarea = screen.getByRole('textbox', { name: /journal entry content/i });
+      fireEvent.change(textarea, { target: { value: 'Written just before leaving.' } });
+      const urlBefore = window.location.pathname;
+
+      unmount();
+
+      expect(mockDbAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ content: 'Written just before leaving.' }),
+      );
+      await act(async () => {
+        await Promise.resolve();
+      });
+      // The flushed save must not rewrite the URL of the page we navigated to
+      expect(window.location.pathname).toBe(urlBefore);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('does not auto-save when nothing has been typed', async () => {
     vi.useFakeTimers();
     try {

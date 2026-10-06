@@ -71,6 +71,9 @@ export default function JournalEntry() {
   // Refs for timer and entry ID — only accessed in handlers/effects, never in render
   const entryIdRef = useRef<string | undefined>(id);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Latest unsaved values, so a pending save can be flushed on unmount
+  const pendingSaveRef = useRef<(() => Promise<void>) | null>(null);
+  const mountedRef = useRef(false);
 
   const [editor, setEditor] = useState<EditorState>(() => ({
     initialized: isNew, // new entries need no DB load
@@ -92,10 +95,15 @@ export default function JournalEntry() {
     });
   }, [id]);
 
-  // Flush pending save on unmount
+  // Flush pending save on unmount so edits made just before leaving aren't lost
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      const pending = pendingSaveRef.current;
+      pendingSaveRef.current = null;
+      if (pending) void pending();
     };
   }, []);
 
@@ -121,7 +129,11 @@ export default function JournalEntry() {
       });
       await recalculateStreak();
       setEditor((prev) => ({ ...prev, createdAt: now, lastSaved: now }));
-      window.history.replaceState(null, '', `/journal/${newId}`);
+      // Only rewrite the URL while still on this page (not when flushing on
+      // unmount), and keep React Router's history state intact.
+      if (mountedRef.current) {
+        window.history.replaceState(window.history.state, '', `/journal/${newId}`);
+      }
     } else {
       await db.journalEntries.update(entryIdRef.current, { content, tags, prompt, updatedAt: now });
       setEditor((prev) => ({ ...prev, lastSaved: now }));
@@ -131,8 +143,12 @@ export default function JournalEntry() {
   /** Schedule auto-save, capturing current values in the closure. */
   function scheduleAutoSave(content: string, tags: string[], prompt: string | undefined): void {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    const save = () => performSave(content, tags, prompt);
+    pendingSaveRef.current = save;
     saveTimerRef.current = setTimeout(() => {
-      void performSave(content, tags, prompt);
+      saveTimerRef.current = null;
+      pendingSaveRef.current = null;
+      void save();
     }, AUTOSAVE_DELAY_MS);
   }
 
