@@ -13,6 +13,8 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return { ...actual, useNavigate: () => mockNavigate };
 });
 
+type ShellProps = { onSaveReflections?: (r: Record<string, string>) => void };
+
 // Stub ExerciseShell to avoid portal/animation complexity
 vi.mock('../components/exercise/ExerciseShell', () => ({
   default: vi.fn(
@@ -93,7 +95,7 @@ describe('ExerciseSession', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises', { replace: true });
     });
   });
 
@@ -139,12 +141,29 @@ describe('ExerciseSession', () => {
     });
   });
 
+  it('Save to journal titles each response with its question, not its step ID', async () => {
+    const ShellMock = vi.mocked((await import('../components/exercise/ExerciseShell')).default);
+    ShellMock.mockImplementationOnce((({ onSaveReflections }: ShellProps) => (
+      <button onClick={() => onSaveReflections?.({ 'sj-projection': 'my neighbour' })}>
+        Save to journal
+      </button>
+    )) as never);
+    renderForExercise('shadow-journaling');
+    fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
+
+    await waitFor(async () => {
+      const journals = await db.journalEntries.toArray();
+      expect(journals[0]!.content).toContain('my neighbour');
+      expect(journals[0]!.content).not.toContain('**sj-projection**');
+    });
+  });
+
   it('Save to journal navigates to /journal', async () => {
     renderForExercise('shadow-journaling');
     fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+      expect(mockNavigate).toHaveBeenCalledWith('/journal', { replace: true });
     });
   });
 
@@ -172,7 +191,7 @@ describe('ExerciseSession — inner-child', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises', { replace: true });
     });
   });
 
@@ -216,7 +235,7 @@ describe('ExerciseSession — inner-child', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+      expect(mockNavigate).toHaveBeenCalledWith('/journal', { replace: true });
     });
   });
 
@@ -243,7 +262,7 @@ describe('ExerciseSession — active-imagination', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises', { replace: true });
     });
   });
 
@@ -285,7 +304,7 @@ describe('ExerciseSession — active-imagination', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+      expect(mockNavigate).toHaveBeenCalledWith('/journal', { replace: true });
     });
   });
 });
@@ -302,7 +321,7 @@ describe('ExerciseSession — mirror-work', () => {
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/exercises');
+      expect(mockNavigate).toHaveBeenCalledWith('/exercises', { replace: true });
     });
   });
 
@@ -344,7 +363,7 @@ describe('ExerciseSession — mirror-work', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save to journal' }));
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/journal');
+      expect(mockNavigate).toHaveBeenCalledWith('/journal', { replace: true });
     });
   });
 });

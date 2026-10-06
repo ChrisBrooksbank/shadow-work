@@ -62,7 +62,7 @@ export async function queryTodaysCheckIn(): Promise<DailyCheckIn | null> {
 
 /** Returns the N most recent activity items across all activity types. */
 export async function queryRecentActivity(limit = 10): Promise<RecentActivityItem[]> {
-  const [checkIns, journals, exercises] = await Promise.all([
+  const [checkIns, journals, completions] = await Promise.all([
     db.dailyCheckIns.toArray(),
     db.journalEntries.toArray(),
     db.exerciseCompletions.toArray(),
@@ -81,11 +81,11 @@ export async function queryRecentActivity(limit = 10): Promise<RecentActivityIte
       date: j.createdAt,
       label: 'Journal entry',
     })),
-    ...exercises.map((e) => ({
+    ...completions.map((e) => ({
       type: 'exercise' as const,
       id: e.id,
       date: e.completedAt,
-      label: `Exercise: ${e.exerciseId}`,
+      label: exercises.find((ex) => ex.id === e.exerciseId)?.title ?? `Exercise: ${e.exerciseId}`,
     })),
   ];
 

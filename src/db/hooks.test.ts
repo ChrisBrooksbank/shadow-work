@@ -190,7 +190,7 @@ test('queryRecentActivity labels are correct per type', async () => {
   const checkIn = items.find((i) => i.type === 'checkIn');
   const exercise = items.find((i) => i.type === 'exercise');
   expect(checkIn?.label).toBe('Daily check-in');
-  expect(exercise?.label).toBe('Exercise: mirror-work');
+  expect(exercise?.label).toBe('Mirror Work');
 });
 
 // ── todayDateString ────────────────────────────────────────────────────────────
