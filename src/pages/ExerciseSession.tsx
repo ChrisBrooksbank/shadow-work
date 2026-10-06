@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { exercises } from '../data/exercises';
+import type { Exercise, ExerciseStep } from '../data/exercises';
 import ExerciseShell from '../components/exercise/ExerciseShell';
 import { db } from '../db/index';
 import { recalculateStreak } from '../db/streak';
@@ -7,12 +9,38 @@ import type { DreamEntry, TriggerLog } from '../db/schema';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Bundle exercise responses into a readable journal entry body. */
-function bundleResponses(exerciseTitle: string, responses: Record<string, string>): string {
-  const lines: string[] = [`# ${exerciseTitle}`, ''];
-  for (const [stepId, value] of Object.entries(responses)) {
-    if (value.trim()) {
-      lines.push(`**${stepId}**`, value.trim(), '');
+/** Human-readable heading for a step — the question it asked, not its internal ID. */
+function stepHeading(step: ExerciseStep): string {
+  switch (step.type) {
+    case 'prompt':
+    case 'choice':
+      return step.question;
+    case 'freewrite':
+    case 'reflection':
+      return step.prompt;
+    case 'timed-pause':
+      return step.label;
+    case 'instruction':
+      return step.title ?? step.id;
+  }
+}
+
+/** Bundle exercise responses into a readable journal entry body, in step order. */
+function bundleResponses(exercise: Exercise, responses: Record<string, string>): string {
+  const lines: string[] = [`# ${exercise.title}`, ''];
+  const known = new Set<string>();
+  for (const step of exercise.steps) {
+    known.add(step.id);
+    const value = responses[step.id]?.trim();
+    if (value) {
+      lines.push(`**${stepHeading(step)}**`, value, '');
+    }
+  }
+  // Keep anything that doesn't map to a step rather than silently dropping it
+  for (const [stepId, raw] of Object.entries(responses)) {
+    const value = raw.trim();
+    if (!known.has(stepId) && value) {
+      lines.push(`**${stepId}**`, value, '');
     }
   }
   return lines.join('\n').trim();
@@ -36,13 +64,13 @@ async function saveCompletion(
 }
 
 async function saveCompletionWithJournal(
-  exercise: { id: string; title: string },
+  exercise: Exercise,
   responses: Record<string, string>,
   startedAt: Date,
 ): Promise<void> {
   const now = new Date();
   const durationSeconds = Math.round((now.getTime() - startedAt.getTime()) / 1000);
-  const content = bundleResponses(exercise.title, responses);
+  const content = bundleResponses(exercise, responses);
 
   await Promise.all([
     db.exerciseCompletions.add({
@@ -299,6 +327,8 @@ async function saveDreamEntry(responses: Record<string, string>): Promise<void> 
 export default function ExerciseSession() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // Captured once on mount; a plain `new Date()` here would reset on every render.
+  const [mountedAt] = useState(() => new Date());
 
   const exercise = exercises.find((e) => e.id === id);
 
@@ -310,9 +340,6 @@ export default function ExerciseSession() {
     );
   }
 
-  // startedAt is tracked inside ExerciseShell/useExerciseFlow; we approximate
-  // duration from when the shell mounts to when completion fires.
-  const mountedAt = new Date();
   // Capture as a non-nullable local so closures have a definite type.
   const ex = exercise;
 
@@ -322,18 +349,18 @@ export default function ExerciseSession() {
         saveCompletion(ex.id, responses, mountedAt),
         saveTriggerLog(responses),
       ]).then(() => {
-        navigate('/exercises/trigger-patterns');
+        navigate('/exercises/trigger-patterns', { replace: true });
       });
     } else if (ex.id === 'dream-work') {
       void Promise.all([
         saveCompletion(ex.id, responses, mountedAt),
         saveDreamEntry(responses),
       ]).then(() => {
-        navigate('/exercises/dream-journal');
+        navigate('/exercises/dream-journal', { replace: true });
       });
     } else {
       void saveCompletion(ex.id, responses, mountedAt).then(() => {
-        navigate('/exercises');
+        navigate('/exercises', { replace: true });
       });
     }
   }
@@ -341,33 +368,33 @@ export default function ExerciseSession() {
   function handleSaveReflections(responses: Record<string, string>) {
     if (ex.id === 'inner-child') {
       void saveInnerChildLetter(responses, mountedAt).then(() => {
-        navigate('/journal');
+        navigate('/journal', { replace: true });
       });
     } else if (ex.id === 'active-imagination') {
       void saveActiveImagination(responses, mountedAt).then(() => {
-        navigate('/journal');
+        navigate('/journal', { replace: true });
       });
     } else if (ex.id === 'mirror-work') {
       void saveMirrorWork(responses, mountedAt).then(() => {
-        navigate('/journal');
+        navigate('/journal', { replace: true });
       });
     } else if (ex.id === 'trigger-tracking') {
       void Promise.all([
         saveCompletionWithJournal(ex, responses, mountedAt),
         saveTriggerLog(responses),
       ]).then(() => {
-        navigate('/exercises/trigger-patterns');
+        navigate('/exercises/trigger-patterns', { replace: true });
       });
     } else if (ex.id === 'dream-work') {
       void Promise.all([
         saveCompletionWithJournal(ex, responses, mountedAt),
         saveDreamEntry(responses),
       ]).then(() => {
-        navigate('/exercises/dream-journal');
+        navigate('/exercises/dream-journal', { replace: true });
       });
     } else {
       void saveCompletionWithJournal(ex, responses, mountedAt).then(() => {
-        navigate('/journal');
+        navigate('/journal', { replace: true });
       });
     }
   }

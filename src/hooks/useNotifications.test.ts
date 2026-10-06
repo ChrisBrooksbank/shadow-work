@@ -1,6 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { msUntilNextOccurrence, pickOneLiner, useNotifications } from './useNotifications';
+import {
+  msUntilNextOccurrence,
+  pickOneLiner,
+  useNotifications,
+  useReminderScheduler,
+} from './useNotifications';
 
 // ── Notification mock ──────────────────────────────────────────────────────────
 
@@ -188,12 +193,12 @@ describe('useNotifications — setReminderTime', () => {
   });
 });
 
-describe('useNotifications — notification scheduling', () => {
+describe('useReminderScheduler', () => {
   test('does not schedule when disabled', () => {
     setupNotificationMock('granted');
     const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
 
-    renderHook(() => useNotifications());
+    renderHook(() => useReminderScheduler());
 
     // No timer scheduled because enabled is false
     expect(mockNotificationConstructor).not.toHaveBeenCalled();
@@ -218,7 +223,7 @@ describe('useNotifications — notification scheduling', () => {
     // Set current fake time to 2026-03-16 10:00:00 so 20:00 is 10h away
     vi.setSystemTime(new Date('2026-03-16T10:00:00'));
 
-    renderHook(() => useNotifications());
+    renderHook(() => useReminderScheduler());
 
     // Advance 10 hours = 36000000 ms
     act(() => {
@@ -241,7 +246,7 @@ describe('useNotifications — notification scheduling', () => {
     );
     vi.setSystemTime(new Date('2026-03-16T10:00:00'));
 
-    renderHook(() => useNotifications());
+    renderHook(() => useReminderScheduler());
 
     act(() => {
       vi.advanceTimersByTime(24 * 60 * 60 * 1000);
@@ -260,7 +265,7 @@ describe('useNotifications — notification scheduling', () => {
     );
     vi.setSystemTime(new Date('2026-03-16T10:00:00'));
 
-    const { unmount } = renderHook(() => useNotifications());
+    const { unmount } = renderHook(() => useReminderScheduler());
     unmount();
 
     expect(clearTimeoutSpy).toHaveBeenCalled();
@@ -275,7 +280,7 @@ describe('useNotifications — notification scheduling', () => {
     );
     vi.setSystemTime(new Date('2026-03-16T10:00:00'));
 
-    renderHook(() => useNotifications());
+    renderHook(() => useReminderScheduler());
 
     // Fire first notification (10h)
     act(() => {
@@ -288,5 +293,51 @@ describe('useNotifications — notification scheduling', () => {
       vi.advanceTimersByTime(24 * 60 * 60 * 1000);
     });
     expect(mockNotificationConstructor).toHaveBeenCalledTimes(2);
+  });
+
+  test('schedules once reminders are enabled from the settings hook', () => {
+    setupNotificationMock('granted');
+    vi.setSystemTime(new Date('2026-03-16T10:00:00'));
+
+    renderHook(() => useReminderScheduler());
+    const settings = renderHook(() => useNotifications());
+
+    act(() => {
+      settings.result.current.setEnabled(true);
+    });
+    act(() => {
+      vi.advanceTimersByTime(10 * 60 * 60 * 1000);
+    });
+
+    expect(mockNotificationConstructor).toHaveBeenCalledOnce();
+  });
+
+  test('uses the service worker registration when available', async () => {
+    setupNotificationMock('granted');
+    const showNotification = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'serviceWorker', {
+      value: { getRegistration: vi.fn().mockResolvedValue({ showNotification }) },
+      configurable: true,
+    });
+    localStorage.setItem(
+      'shadow:notification-settings',
+      JSON.stringify({ enabled: true, time: '20:00' }),
+    );
+    vi.setSystemTime(new Date('2026-03-16T10:00:00'));
+
+    try {
+      renderHook(() => useReminderScheduler());
+      await act(async () => {
+        vi.advanceTimersByTime(10 * 60 * 60 * 1000);
+      });
+
+      expect(showNotification).toHaveBeenCalledWith(
+        'Shadow Work',
+        expect.objectContaining({ icon: '/icons/icon-192.png' }),
+      );
+      expect(mockNotificationConstructor).not.toHaveBeenCalled();
+    } finally {
+      delete (navigator as unknown as Record<string, unknown>).serviceWorker;
+    }
   });
 });

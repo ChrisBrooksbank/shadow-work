@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import { db } from '../db';
+import { recalculateStreak } from '../db/streak';
 import { useNotifications } from '../hooks/useNotifications';
 import styles from './Settings.module.css';
 
@@ -54,7 +55,7 @@ async function exportData(): Promise<void> {
 type ImportMode = 'merge' | 'replace';
 
 async function importData(json: string, mode: ImportMode): Promise<void> {
-  const data = JSON.parse(json) as Record<string, unknown[]>;
+  const data = reviveDates(JSON.parse(json) as Record<string, unknown[]>);
 
   if (mode === 'replace') {
     await db.transaction(
@@ -98,9 +99,54 @@ async function importData(json: string, mode: ImportMode): Promise<void> {
       },
     );
   }
+  await recalculateStreak();
+}
+
+const DATE_FIELDS = ['createdAt', 'updatedAt', 'completedAt'] as const;
+
+/**
+ * JSON has no Date type, so exported timestamps come back as ISO strings.
+ * Convert them back to Date objects so the rest of the app (sorting,
+ * streaks, date keys) can call Date methods on them.
+ */
+function reviveDates(data: Record<string, unknown[]>): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
+  for (const [key, rows] of Object.entries(data)) {
+    if (!Array.isArray(rows)) continue;
+    result[key] = rows.map((row) => {
+      if (row === null || typeof row !== 'object') return row;
+      const copy = { ...(row as Record<string, unknown>) };
+      for (const field of DATE_FIELDS) {
+        const value = copy[field];
+        if (typeof value === 'string' || typeof value === 'number') {
+          const date = new Date(value);
+          if (!Number.isNaN(date.getTime())) copy[field] = date;
+        }
+      }
+      return copy;
+    });
+  }
+  return result;
 }
 
 async function bulkPut(data: Record<string, unknown[]>): Promise<void> {
+  // dailyCheckIns has a unique `date` index. When merging, a backup may hold a
+  // check-in for a date that already has one locally under a different id —
+  // that would abort the whole transaction, so keep the local one instead.
+  const incomingCheckIns = data['dailyCheckIns'];
+  if (Array.isArray(incomingCheckIns) && incomingCheckIns.length > 0) {
+    const existing = await db.dailyCheckIns.toArray();
+    const idByDate = new Map(existing.map((c) => [c.date, c.id]));
+    data = {
+      ...data,
+      dailyCheckIns: incomingCheckIns.filter((row) => {
+        const { id, date } = row as { id?: string; date?: string };
+        const localId = date !== undefined ? idByDate.get(date) : undefined;
+        return localId === undefined || localId === id;
+      }),
+    };
+  }
+
   const tables = [
     { key: 'journalEntries', table: db.journalEntries },
     { key: 'exerciseCompletions', table: db.exerciseCompletions },
@@ -149,6 +195,7 @@ async function clearAllData(): Promise<void> {
       ]);
     },
   );
+  await recalculateStreak();
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────

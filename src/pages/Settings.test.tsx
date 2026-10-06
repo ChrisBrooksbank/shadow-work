@@ -45,6 +45,10 @@ vi.mock('../db', () => {
   };
 });
 
+vi.mock('../db/streak', () => ({
+  recalculateStreak: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock URL.createObjectURL / revokeObjectURL
 URL.createObjectURL = vi.fn(() => 'blob:mock');
 URL.revokeObjectURL = vi.fn();
@@ -232,6 +236,54 @@ describe('Settings page', () => {
         expect(db.journalEntries.clear).toHaveBeenCalled();
         expect(screen.getByRole('status')).toHaveTextContent(/imported.*replace/i);
       });
+    });
+
+    it('restores exported ISO timestamps as Date objects', async () => {
+      const { db } = await import('../db');
+      const { recalculateStreak } = await import('../db/streak');
+      renderPage();
+      uploadFile(validExport);
+      await waitFor(() => {
+        expect(screen.getByRole('dialog', { name: /import data/i })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^import$/i }));
+      await waitFor(() => {
+        expect(db.journalEntries.bulkPut).toHaveBeenCalled();
+      });
+      const rows = vi.mocked(db.journalEntries.bulkPut).mock.calls[0]![0] as unknown as {
+        createdAt: unknown;
+        updatedAt: unknown;
+      }[];
+      expect(rows[0]!.createdAt).toBeInstanceOf(Date);
+      expect(rows[0]!.updatedAt).toBeInstanceOf(Date);
+      expect(recalculateStreak).toHaveBeenCalled();
+    });
+
+    it('skips imported check-ins whose date already has a local check-in', async () => {
+      const { db } = await import('../db');
+      vi.mocked(db.dailyCheckIns.toArray).mockResolvedValue([
+        { id: 'local', date: '2026-01-01' } as never,
+      ]);
+      renderPage();
+      uploadFile(
+        JSON.stringify({
+          dailyCheckIns: [
+            { id: 'other', date: '2026-01-01', createdAt: '2026-01-01T10:00:00.000Z' },
+            { id: 'new', date: '2026-01-02', createdAt: '2026-01-02T10:00:00.000Z' },
+          ],
+        }),
+      );
+      await waitFor(() => {
+        expect(screen.getByRole('dialog', { name: /import data/i })).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^import$/i }));
+      await waitFor(() => {
+        expect(db.dailyCheckIns.bulkPut).toHaveBeenCalled();
+      });
+      const rows = vi.mocked(db.dailyCheckIns.bulkPut).mock.calls[0]![0] as unknown as {
+        id: string;
+      }[];
+      expect(rows.map((r) => r.id)).toEqual(['new']);
     });
 
     it('cancels import modal without importing', async () => {

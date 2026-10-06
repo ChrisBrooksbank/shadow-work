@@ -33,12 +33,40 @@ test('queryStreak returns the cached record from DB', async () => {
     key: 'current',
     currentStreak: 5,
     longestStreak: 10,
-    lastActiveDate: '2026-03-14',
+    lastActiveDate: toDateString(new Date()),
     totalActiveDays: 20,
   });
 
   const record = await queryStreak();
   expect(record.currentStreak).toBe(5);
+  expect(record.longestStreak).toBe(10);
+  expect(record.totalActiveDays).toBe(20);
+});
+
+test('queryStreak keeps a streak alive when last active yesterday', async () => {
+  await db.streaks.put({
+    key: 'current',
+    currentStreak: 3,
+    longestStreak: 3,
+    lastActiveDate: toDateString(new Date(Date.now() - 86_400_000)),
+    totalActiveDays: 3,
+  });
+
+  const record = await queryStreak();
+  expect(record.currentStreak).toBe(3);
+});
+
+test('queryStreak reports a lapsed streak as zero', async () => {
+  await db.streaks.put({
+    key: 'current',
+    currentStreak: 5,
+    longestStreak: 10,
+    lastActiveDate: toDateString(new Date(Date.now() - 3 * 86_400_000)),
+    totalActiveDays: 20,
+  });
+
+  const record = await queryStreak();
+  expect(record.currentStreak).toBe(0);
   expect(record.longestStreak).toBe(10);
   expect(record.totalActiveDays).toBe(20);
 });
@@ -162,7 +190,7 @@ test('queryRecentActivity labels are correct per type', async () => {
   const checkIn = items.find((i) => i.type === 'checkIn');
   const exercise = items.find((i) => i.type === 'exercise');
   expect(checkIn?.label).toBe('Daily check-in');
-  expect(exercise?.label).toBe('Exercise: mirror-work');
+  expect(exercise?.label).toBe('Mirror Work');
 });
 
 // ── todayDateString ────────────────────────────────────────────────────────────

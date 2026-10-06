@@ -15,6 +15,7 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import TriggerPatterns from './pages/TriggerPatterns';
 import { useUserSettings } from './db/hooks';
+import { useReminderScheduler } from './hooks/useNotifications';
 
 /** Redirects to /onboarding on first launch (when no settings or onboardingComplete is false). */
 function OnboardingGuard() {
@@ -35,10 +36,17 @@ function OnboardingGuard() {
   return null;
 }
 
+/** Keeps the daily reminder scheduled for as long as the app is open. */
+function ReminderScheduler() {
+  useReminderScheduler();
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <OnboardingGuard />
+      <ReminderScheduler />
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />

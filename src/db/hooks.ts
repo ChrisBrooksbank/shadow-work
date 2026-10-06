@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './index';
+import { toDateString } from './streak';
 import type { DailyCheckIn, StreakRecord, TriggerLog } from './schema';
 import type { ExerciseCategory } from '../data/exercises';
 import { exercises } from '../data/exercises';
@@ -35,7 +36,22 @@ export function todayDateString(): string {
  */
 export async function queryStreak(): Promise<StreakRecord> {
   const r = await db.streaks.get('current');
-  return r ?? DEFAULT_STREAK;
+  if (!r) return DEFAULT_STREAK;
+  // The cache is only rewritten when activity is recorded, so a streak that
+  // lapsed since then would otherwise keep showing. A streak is alive only if
+  // the last active day was today or yesterday.
+  if (r.currentStreak > 0 && isStreakBroken(r.lastActiveDate)) {
+    return { ...r, currentStreak: 0 };
+  }
+  return r;
+}
+
+function isStreakBroken(lastActiveDate: string): boolean {
+  if (!lastActiveDate) return true;
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  // YYYY-MM-DD strings compare correctly as plain strings
+  return lastActiveDate < toDateString(yesterday);
 }
 
 /** Reads today's check-in, or null if none recorded yet. */
@@ -46,7 +62,7 @@ export async function queryTodaysCheckIn(): Promise<DailyCheckIn | null> {
 
 /** Returns the N most recent activity items across all activity types. */
 export async function queryRecentActivity(limit = 10): Promise<RecentActivityItem[]> {
-  const [checkIns, journals, exercises] = await Promise.all([
+  const [checkIns, journals, completions] = await Promise.all([
     db.dailyCheckIns.toArray(),
     db.journalEntries.toArray(),
     db.exerciseCompletions.toArray(),
@@ -65,11 +81,11 @@ export async function queryRecentActivity(limit = 10): Promise<RecentActivityIte
       date: j.createdAt,
       label: 'Journal entry',
     })),
-    ...exercises.map((e) => ({
+    ...completions.map((e) => ({
       type: 'exercise' as const,
       id: e.id,
       date: e.completedAt,
-      label: `Exercise: ${e.exerciseId}`,
+      label: exercises.find((ex) => ex.id === e.exerciseId)?.title ?? `Exercise: ${e.exerciseId}`,
     })),
   ];
 
